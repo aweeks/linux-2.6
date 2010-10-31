@@ -1,19 +1,19 @@
 -> git config --global user.name "Kevin McIntosh"
-
+	
 	Explanation
 	---
 	config				Anything related to the current repository
 	--global			Do this to everything
 	user.name			Go to the user name key
 	"Kevin McIntosh"	Modify the key with this user name
-
+	
 -> git clone <url>
-
+	
 	Explination
 	---
 	Create a local copy of a remote repository	
 	(In terms of proj2, cs411: git@github.com:aweeks/cs411-w)
-
+	
 -> git add <file>
 
 	Explination
@@ -21,21 +21,21 @@
 	Add a new file or directory
 	Ex: git add ./
 	Don't need to readd if you have already modified it
-
+	
 -> git commit -m "<message>"
 
 	Explination
 	---
 	Commit to your local drive
 	Does not commit to the server
-
+	
 -> git push
 
 	Explination
 	---
 	Push revisions to the remote server
 	Won't work if there are conflicts
-
+	
 -> git pull
 
 	Explination
@@ -57,45 +57,7 @@
 	Get remote revisions and don not apply
 
 -> git log
+        Explanation
+        ---
+        View the commit log.
 
-	Explanation
-	---
-	View the commit log.
-
--> git reset --hard
-
-	Explination
-	----
-	Roll back to the previous version, removing all changes
-
-__________________
-Steps to setting up a branch
-
-git branch foo
-	Make a new branch with a name foo
-
-git branch foo v2.6.34 
-	Have the branch "foo" point to where the "v2.6.34" tag is pointing
-
-git checkout foo
-	Check out where v2.6.34 is pointing
-__________________________
-Pushing/Pulling to a branch
-
-git pull [main] [branch]
-	EX: git pull git@github.com:aweeks/linux-2.6 project3
-
-You can skip this and use "git pull/push" by adding the following to the config file.  
-Sample case is Assignment 3
-
-	[branch "project3"]
-		remote = origin
-		merge = refs/heads/project3
-
-	[remote "origin"]
-		fetch = +refs/heads/*:refs/remotes/origin/*
-		url = git@github.com:aweeks/linux-2.6.git
-___________________________
-Check out a branch (after you added the repsitory)
-
-	git checkout -b origin/project3

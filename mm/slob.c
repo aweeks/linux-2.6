@@ -269,7 +269,7 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 {
 	slob_t *prev, *cur, *aligned = NULL;
 	
-	printk(KERN_ALERT "Hello world\n");
+	//printk(KERN_ALERT "Hello world\n"); //This is how we do it
 	int delta = 0, units = SLOB_UNITS(size);
 
 	for (prev = NULL, cur = sp->free; ; prev = cur, cur = slob_next(cur)) {

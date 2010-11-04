@@ -263,7 +263,7 @@ static void slob_free_pages(void *b, int order)
 }
 
 //Get the best fit size internal to a page
-int get_best_fit_size(struct slob_page *sp, size_t size){
+int get_best_fit_size(struct slob_page *sp, size_t size, int align){
 	int best_fit = 0;
 	
 	slob_t *prev, *cur, *aligned = NULL;
@@ -279,7 +279,7 @@ int get_best_fit_size(struct slob_page *sp, size_t size){
 			delta = aligned - cur;
 		}
 		
-		if (avail >= units + delta && (!best_fit || best_fit > current))  /* room enough? */
+		if (avail >= units + delta && (!best_fit || best_fit > avail))  /* room enough? */
 		{
 			best_fit = avail;
 		}
@@ -293,6 +293,8 @@ int get_best_fit_size(struct slob_page *sp, size_t size){
  */
 static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 {
+	int best_fit = 0;
+	
 	slob_t *prev, *cur, *aligned, *best_block = NULL;
 	slobidx_t avail;
 	
@@ -385,7 +387,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		if (sp->units < SLOB_UNITS(size))
 			continue;
 
-		size_t new_size = _best_fit_page(sp, size);
+		size_t new_size = _best_fit_page(sp, size, align);
 		/*Get the best size*/
 		if ((best_size > new_best || !best_fit) && new_best){
 			best_fit = new_best

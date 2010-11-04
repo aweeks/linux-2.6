@@ -8,18 +8,19 @@ echo "------\n"
 
 make
 
-if ("$?" != 0) 
-	then 
-		echo "Make file failed"
-		exit
+
+if test $? -ne 0
+then 
+	echo "*******\nMake file failed\n**********"
+	exit
 fi
 
 make modules_install;
 
-if ("$?" != 0) 
-	then 
-		echo "Make file Modules failed"
-		exit
+if test $? -ne 0
+then 
+	echo"*******\nMake file modules failed\n**********"
+	exit
 fi
 
 echo "Renaming"

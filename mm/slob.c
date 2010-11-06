@@ -387,10 +387,10 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		if (sp->units < SLOB_UNITS(size))
 			continue;
 
-		size_t new_size = _best_fit_page(sp, size, align);
+		size_t new_size = get_best_fit_size(sp, size, align);
 		/*Get the best size*/
-		if ((best_size > new_best || !best_fit) && new_best){
-			best_fit = new_best
+		if ((best_size > new_size || !best_fit) && new_best){
+			best_fit = new_size;
 			best_fit_page = sp;
 		}
 		

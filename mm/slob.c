@@ -360,6 +360,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 	struct list_head *slob_list;
 	slob_t *b = NULL;
 	unsigned long flags;
+	size_t best_fit = NULL;
 
 	if (size < SLOB_BREAK1)
 		slob_list = &free_slob_small;
@@ -389,7 +390,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 
 		size_t new_size = get_best_fit_size(sp, size, align);
 		/*Get the best size*/
-		if ((best_size > new_size || !best_fit) && new_best){
+		if ((best_size > new_size || !best_fit) && new_size){
 			best_fit = new_size;
 			best_fit_page = sp;
 		}
@@ -400,7 +401,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		if (!b)
 			continue;
 
-		/* Improve fragment distribution and reduce our average
+		 Improve fragment distribution and reduce our average
 		 * search time by starting our next search here. (see
 		 * Knuth vol 1, sec 2.5, pg 449) */
 		/*if (prev != slob_list->prev &&

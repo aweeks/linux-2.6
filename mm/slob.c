@@ -427,14 +427,17 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 	early_printk(KERN_ALERT "Best size status: %d\n", best_size);
 	/* Not enough space: must allocate a new page */
 	if (!best_size) {
-		early_printk(KERN_ALERT " Not enough space: must allocate a new page\n");
+		early_printk(KERN_ALERT "Not enough space: must allocate a new page\n");
 		
 		b = slob_new_pages(gfp & ~__GFP_ZERO, 0, node);
+		early_printk(KERN_ALERT "Tried to get a new page\n");
+		
 		if (!b)
 			return NULL;
 		sp = slob_page(b);
 		set_slob_page(sp);
-
+		early_printk(KERN_ALERT "Got a pointer, set the slob page\n");
+		
 		spin_lock_irqsave(&slob_lock, flags);
 		sp->units = SLOB_UNITS(PAGE_SIZE);
 		sp->free = b;

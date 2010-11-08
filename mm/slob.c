@@ -320,7 +320,7 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 		}
 
         if (slob_last(cur))
-            return NULL;
+            return 0;
 	}
 	
 	if (delta) { /* need to fragment head to align? */
@@ -367,7 +367,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
     struct slob_page *best_fit_page;
 	size_t curr_size, best_size = 0;
 
-    printk(KERN_ALERT "slob_alloc size: %u", size);
+    early_printk(KERN_ALERT "slob_alloc size: %u\n", size);
 
 	if (size < SLOB_BREAK1)
 		slob_list = &free_slob_small;

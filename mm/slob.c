@@ -305,7 +305,7 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 
 	for (prev = NULL, cur = sp->free; ; prev = cur, cur = slob_next(cur)) 
 	{
-		early_printk(KERN_ALERT "At block segment 0x%p", cur);
+		early_printk(KERN_ALERT "At block segment 0x%p\n", cur);
 		avail = slob_units(cur);
 		
 		if (align) 
@@ -448,7 +448,9 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		set_slob(b, SLOB_UNITS(PAGE_SIZE), b + SLOB_UNITS(PAGE_SIZE));
 		set_slob_page_free(sp, slob_list);
 		b = slob_page_alloc(sp, size, align);
-		early_printk(KERN_ALERT "Allocating a new page from inside the page\n");
+		early_printk(KERN_ALERT "Allocating a new block from inside the page\n");
+		if (!b)
+			early_printk(KERN_ALERT "It was not able to get the memory");
 		BUG_ON(!b);
 		spin_unlock_irqrestore(&slob_lock, flags);
 	}

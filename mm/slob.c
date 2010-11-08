@@ -362,7 +362,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
     struct slob_page *best_fit_page;
 	size_t curr_size, best_size = 0;
 
-    printk("slob_alloc size: %u", size);
+    printk(KERN_ALERT "slob_alloc size: %u", size);
 
 	if (size < SLOB_BREAK1)
 		slob_list = &free_slob_small;

@@ -418,13 +418,17 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		
 	}
 	early_printk(KERN_ALERT "Missed the loop\n");
+	
 	if (best_size)
 		slob_page_alloc(best_fit_page, best_size, align);
 		
 	spin_unlock_irqrestore(&slob_lock, flags);
 
+	early_printk(KERN_ALERT "Best size status: %d\n", best_size);
 	/* Not enough space: must allocate a new page */
 	if (!best_size) {
+		early_printk(KERN_ALERT " Not enough space: must allocate a new page\n");
+		
 		b = slob_new_pages(gfp & ~__GFP_ZERO, 0, node);
 		if (!b)
 			return NULL;
@@ -441,7 +445,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		BUG_ON(!b);
 		spin_unlock_irqrestore(&slob_lock, flags);
 	}
-	
+	early_printk(KERN_ALERT "Passed the if block.  Page was allocated.\n");
 	
 	if (unlikely((gfp & __GFP_ZERO) && b))
 		memset(b, 0, size);

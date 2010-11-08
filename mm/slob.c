@@ -263,7 +263,7 @@ static void slob_free_pages(void *b, int order)
 }
 
 //Get the best fit size internal to a page
-int get_best_fit_size(struct slob_page *sp, size_t size, int align){
+size_t get_best_fit_size(struct slob_page *sp, size_t size, int align){
 	int best_fit = 0;
 	
 	slob_t *prev, *cur, *aligned = NULL;

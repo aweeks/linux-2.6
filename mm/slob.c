@@ -283,6 +283,8 @@ size_t get_best_fit_size(struct slob_page *sp, size_t size, int align){
 		{
 			best_fit = avail;
 		}
+        if (slob_last(cur))
+            return NULL;
 	}
 	
 	return best_fit;
@@ -316,6 +318,9 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 			best_block = cur;
 			best_fit = avail;
 		}
+
+        if (slob_last(cur))
+            return NULL;
 	}
 	
 	if (delta) { /* need to fragment head to align? */

@@ -316,12 +316,15 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 		
 		if (avail >= units + delta && (!best_fit || best_fit > avail))  /* room enough? */
 		{
+			early_printk(KERN_ALERT "Found a better match\n", cur);
 			best_block = cur;
 			best_fit = avail;
+			//break;
 		}
 
         if (slob_last(cur))
-            return 0;
+            break;
+            //return 0;
 	}
 	
 	if (delta) { /* need to fragment head to align? */

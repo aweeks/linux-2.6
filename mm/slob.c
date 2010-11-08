@@ -385,9 +385,12 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		 * If there's a node specification, search for a partial
 		 * page with a matching node id in the freelist.
 		 */
+		 
 		if (node != -1 && page_to_nid(&sp->page) != node)
 			continue;
 #endif
+		early_printk(KERN_ALERT "At page 0x%p", sp);
+		
 		/* Enough room on this page? */
 		if (sp->units < SLOB_UNITS(size))
 			continue;
@@ -398,7 +401,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
             best_size      = curr_size;
             best_fit_page  = sp;
         }
-		
+		early_printk(KERN_ALERT "Best size: %d", best_size);
 		/* Attempt to alloc */
 		/*prev = sp->list.prev;
 		b = slob_page_alloc(sp, size, align);

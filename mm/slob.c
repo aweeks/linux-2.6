@@ -389,8 +389,8 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		/*Get the best size*/
 		curr_size = get_best_fit_size(sp, size, align);
         if( curr_size < best_size ) {
-            best_fit      = curr_size;
-            best_fit_page = sp;
+            best_size      = curr_size;
+            best_fit_page  = sp;
         }
 		
 		/* Attempt to alloc */
@@ -409,13 +409,13 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		
 	}
 	
-	if (best_fit)
+	if (best_size)
 		slob_page_alloc(best_fit_page, best_size, align);
 		
 	spin_unlock_irqrestore(&slob_lock, flags);
 
 	/* Not enough space: must allocate a new page */
-	if (!best_fit) {
+	if (!best_size) {
 		b = slob_new_pages(gfp & ~__GFP_ZERO, 0, node);
 		if (!b)
 			return NULL;

@@ -302,11 +302,12 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 	
 	//printk(KERN_ALERT "Hello world\n"); //This is how we do it
 	int delta = 0, units = SLOB_UNITS(size);
-
+	slobidx_t avail;
+	
 	for (prev = NULL, cur = sp->free; ; prev = cur, cur = slob_next(cur)) 
 	{
 		//early_printk(KERN_ALERT "At block segment 0x%p\n", cur);
-		slobidx_t avail = slob_units(cur);
+		avail = slob_units(cur);
 		
 		if (align) 
 		{
@@ -316,7 +317,6 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 		
 		if (avail >= units + delta && (!best_fit || best_fit > avail))  /* room enough? */
 		{
-			early_printk(KERN_ALERT "Found a better match\n", cur);
 			best_block = cur;
 			best_fit = avail;
 			//break;

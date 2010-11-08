@@ -295,7 +295,7 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 {
 	int best_fit = 0;
 	
-	slob_t *prev, *cur, *aligned, *best_block = NULL;
+	slob_t *prev, *next, *cur, *aligned, *best_block = NULL;
 	slobidx_t avail;
 	
 	//printk(KERN_ALERT "Hello world\n"); //This is how we do it
@@ -318,8 +318,6 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 		}
 	}
 	
-	slob_t *next;
-
 	if (delta) { /* need to fragment head to align? */
 		next = slob_next(cur);
 		set_slob(aligned, avail - delta, next);

@@ -287,6 +287,7 @@ size_t get_best_fit_size(struct slob_page *sp, size_t size, int align){
             return NULL;
 	}
 	
+	early_printk(KERN_ALERT "you will RETURN with the best");
 	return best_fit;
 }
 
@@ -298,15 +299,14 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 	int best_fit = 0;
 	
 	slob_t *prev, *next, *cur, *aligned, *best_block = NULL;
-	slobidx_t avail;
 	
 	//printk(KERN_ALERT "Hello world\n"); //This is how we do it
 	int delta = 0, units = SLOB_UNITS(size);
 
 	for (prev = NULL, cur = sp->free; ; prev = cur, cur = slob_next(cur)) 
 	{
-		early_printk(KERN_ALERT "At block segment 0x%p\n", cur);
-		avail = slob_units(cur);
+		//early_printk(KERN_ALERT "At block segment 0x%p\n", cur);
+		slobidx_t avail = slob_units(cur);
 		
 		if (align) 
 		{
@@ -320,13 +320,16 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 			best_block = cur;
 			best_fit = avail;
 			//break;
-		}
 
-        if (slob_last(cur))
-            break;
-            //return 0;
+		}
+        	if (slob_last(cur))
+           		break;
 	}
 	
+	avail = best_fit;
+	cur = best_block;
+	if(!best_fit)
+		return NULL;	
 	if (delta) { /* need to fragment head to align? */
 		next = slob_next(cur);
 		set_slob(aligned, avail - delta, next);
@@ -335,7 +338,6 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 		cur = aligned;
 		avail = slob_units(cur);
 	}
-
 	next = slob_next(cur);
 	if (avail == units) { /* exact fit? unlink. */
 		if (prev)
@@ -401,10 +403,10 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 
 		/*Get the best size*/
 		curr_size = get_best_fit_size(sp, size, align);
-        if( curr_size < best_size ) {
-            best_size      = curr_size;
-            best_fit_page  = sp;
-        }
+        	if( curr_size < best_size ) {
+            		best_size      = curr_size;
+            		best_fit_page  = sp;
+        	}
 		early_printk(KERN_ALERT "Best size: %d", best_size);
 		/* Attempt to alloc */
 		/*prev = sp->list.prev;

@@ -778,3 +778,11 @@ void __init kmem_cache_init_late(void)
 {
 	/* Nothing to do */
 }
+
+SYSCALL_DEFINE0(sys_get_slob_amt_claimed) {
+    return 1;
+}
+
+SYSCALL_DEFINE0(sys_get_slob_amt_free) {
+    return 2;
+}

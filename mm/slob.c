@@ -359,7 +359,7 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 {
 	struct slob_page *sp;
-	struct list_head *prev;
+	//struct list_head *prev;
 	struct list_head *slob_list;
 	slob_t *b = NULL;
 	unsigned long flags;
@@ -377,7 +377,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		slob_list = &free_slob_large;
 
 	spin_lock_irqsave(&slob_lock, flags);
-	
+	early_printk(KERN_ALERT "I am still running\n");
 		/* Iterate through each partially free page, try to find room */
 	list_for_each_entry(sp, slob_list, list) {
 #ifdef CONFIG_NUMA
@@ -417,7 +417,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		break;*/
 		
 	}
-	
+	early_printk(KERN_ALERT "Missed the loop\n");
 	if (best_size)
 		slob_page_alloc(best_fit_page, best_size, align);
 		

@@ -1,4 +1,16 @@
 /*
+ * Project 3
+ *   A best-fit memory allocator
+ *
+ * Team 3
+ * Authors:
+ *   Alex Weeks
+ *   Josh Jordahl
+ *   Kevin McIntosh
+ *   Tyler McClung
+ */
+
+/*
  * SLOB Allocator: Simple List Of Blocks
  *
  * Matt Mackall <mpm@selenic.com> 12/30/03

@@ -121,12 +121,12 @@ static inline void free_slob_page(struct slob_page *sp)
 
 /*
  * All partially free slob pages go on these lists.
- */
+ 
 #define SLOB_BREAK1 256
 #define SLOB_BREAK2 1024
 static LIST_HEAD(free_slob_small);
-static LIST_HEAD(free_slob_medium);
-static LIST_HEAD(free_slob_large);
+static LIST_HEAD(free_slob_medium);*/
+static LIST_HEAD(slob_list);
 
 
 /*
@@ -372,7 +372,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 {
 	struct slob_page *sp;
 	//struct list_head *prev;
-	struct list_head *slob_list;
+
 	slob_t *b = NULL;
 	unsigned long flags;
     
@@ -381,12 +381,6 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 
     //early_printk(KERN_ALERT "slob_alloc size: %u\n", size);
 
-	if (size < SLOB_BREAK1)
-		slob_list = &free_slob_small;
-	else if (size < SLOB_BREAK2)
-		slob_list = &free_slob_medium;
-	else
-		slob_list = &free_slob_large;
 
 	spin_lock_irqsave(&slob_lock, flags);
 	//early_printk(KERN_ALERT "I am still running\n");
@@ -439,7 +433,11 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 	//early_printk(KERN_ALERT "Best size status: %d\n", best_size);
 	/* Not enough space: must allocate a new page */
 	if (!best_size) {
+
+		
+
 		//early_printk(KERN_ALERT "Not enough space: must allocate a new page\n");
+
 		
 		b = slob_new_pages(gfp & ~__GFP_ZERO, 0, node);
 		//early_printk(KERN_ALERT "Tried to get a new page\n");

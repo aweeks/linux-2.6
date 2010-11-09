@@ -390,7 +390,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 	spin_lock_irqsave(&slob_lock, flags);
 	//early_printk(KERN_ALERT "I am still running\n");
 		/* Iterate through each partially free page, try to find room */
-	list_for_each_entry(sp, slob_list, list) {
+	list_for_each_entry(sp, &slob_list, list) {
 #ifdef CONFIG_NUMA
 		/*
 		 * If there's a node specification, search for a partial
@@ -464,7 +464,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		INIT_LIST_HEAD(&sp->list);
 		//early_printk(KERN_ALERT "Made the list head\n");
 		set_slob(b, SLOB_UNITS(PAGE_SIZE), b + SLOB_UNITS(PAGE_SIZE));
-		set_slob_page_free(sp, slob_list);
+		set_slob_page_free(sp, &slob_list);
 		b = slob_page_alloc(sp, size, align);
 		//early_printk(KERN_ALERT "Allocating a new block from inside the page\n");
 		if (!b)
@@ -516,7 +516,7 @@ static void slob_free(void *block, int size)
 		set_slob(b, units,
 			(void *)((unsigned long)(b +
 					SLOB_UNITS(PAGE_SIZE)) & PAGE_MASK));
-		set_slob_page_free(sp, &free_slob_small);
+		set_slob_page_free(sp, &slob_list);
 		goto out;
 	}
 

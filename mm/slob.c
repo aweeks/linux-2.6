@@ -128,6 +128,12 @@ static LIST_HEAD(free_slob_small);
 static LIST_HEAD(free_slob_medium);
 static LIST_HEAD(free_slob_large);
 
+
+/*
+ *  For tracking memory utilization
+ */
+size_t slob_amt_claimed = 0, slob_amt_free = 0;
+
 /*
  * is_slob_page: True for all slob pages (false for bigblock pages)
  */
@@ -780,9 +786,9 @@ void __init kmem_cache_init_late(void)
 }
 
 SYSCALL_DEFINE0(sys_get_slob_amt_claimed) {
-    return 1;
+    return slob_amt_claimed;
 }
 
 SYSCALL_DEFINE0(sys_get_slob_amt_free) {
-    return 2;
+    return slob_amt_free;
 }

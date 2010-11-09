@@ -69,6 +69,7 @@
 #include <linux/kmemtrace.h>
 #include <linux/kmemleak.h>
 #include <asm/atomic.h>
+#include <linux/syscalls.h>
 
 /*
  * slob_block has a field 'units', which indicates size of block if +ve,
@@ -290,7 +291,7 @@ size_t get_best_fit_size(struct slob_page *sp, size_t size, int align){
 			best_fit = avail;
 		}
         if (slob_last(cur))
-            return NULL;
+            return 0;
 	}
 	
 	//early_printk(KERN_ALERT "you will RETURN with the best");
@@ -497,6 +498,8 @@ static void slob_free(void *block, int size)
 	units = SLOB_UNITS(size);
 
 	spin_lock_irqsave(&slob_lock, flags);
+    
+    slob_amt_claimed -= units;
 
 	if (sp->units + units == SLOB_UNITS(PAGE_SIZE)) {
 		/* Go directly to page allocator. Do not pass slob allocator */
@@ -506,7 +509,9 @@ static void slob_free(void *block, int size)
 		clear_slob_page(sp);
 		free_slob_page(sp);
 		slob_free_pages(b, 0);
-		return;
+		
+        slob_amt_free -= SLOB_UNITS(PAGE_SIZE);
+        return;
 	}
 
 	if (!slob_page_free(sp)) {
@@ -517,7 +522,7 @@ static void slob_free(void *block, int size)
 			(void *)((unsigned long)(b +
 					SLOB_UNITS(PAGE_SIZE)) & PAGE_MASK));
 		set_slob_page_free(sp, &slob_list);
-		goto out;
+        goto out;
 	}
 
 	/*
@@ -792,10 +797,12 @@ void __init kmem_cache_init_late(void)
 	/* Nothing to do */
 }
 
-SYSCALL_DEFINE0(sys_get_slob_amt_claimed) {
+SYSCALL_DEFINE0(get_slob_amt_claimed)
+{
     return slob_amt_claimed;
 }
 
-SYSCALL_DEFINE0(sys_get_slob_amt_free) {
+SYSCALL_DEFINE0(get_slob_amt_free)
+{
     return slob_amt_free;
 }

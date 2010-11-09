@@ -16,6 +16,6 @@ int main( int argc, const char* argv[] )
 	
 	ratio = (float)free/(float)claimed;
 	
-	printf("ratio is 1 : %f  (claimed: free)/n", ratio);
+	printf("ratio is 1 : %f  (claimed: free)\n", ratio);
 	
 }

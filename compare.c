@@ -1,14 +1,17 @@
 #include <stdio.h>
-#include <syscall.h>
-#include <unistd_32.h>
+#include <sys/syscall.h>
+#include <linux/unistd.h>
+
+#define __NR_get_slob_amt_claimed 338
+#define __NR_get_slob_amt_free 339
 
 int main( int argc, const char* argv[] )
 {
 	size_t free, claimed;
 	float ratio;
 	
-	claimed = get_slob_amt_claimed();
-	free = get_slob_amt_free();
+	claimed = syscall(__NR_get_slob_amt_claimed);
+	free = syscall(__NR_get_slob_amt_free);
 	
 	
 	printf("there is %u claimd\n", claimed);

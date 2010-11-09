@@ -128,6 +128,12 @@ static LIST_HEAD(free_slob_small);
 static LIST_HEAD(free_slob_medium);*/
 static LIST_HEAD(slob_list);
 
+
+/*
+ *  For tracking memory utilization
+ */
+size_t slob_amt_claimed = 0, slob_amt_free = 0;
+
 /*
  * is_slob_page: True for all slob pages (false for bigblock pages)
  */
@@ -329,7 +335,12 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 	avail = best_fit;
 	cur = best_block;
 	if(!best_fit)
-		return NULL;	
+		return NULL;
+    
+    //Record memory as claimed    
+    slob_amt_claimed += size;
+    slob_amt_free -= size;
+    	
 	if (delta) { /* need to fragment head to align? */
 		next = slob_next(cur);
 		set_slob(aligned, avail - delta, next);
@@ -379,7 +390,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 	spin_lock_irqsave(&slob_lock, flags);
 	//early_printk(KERN_ALERT "I am still running\n");
 		/* Iterate through each partially free page, try to find room */
-	list_for_each_entry(sp, slob_list, list) {
+	list_for_each_entry(sp, &slob_list, list) {
 #ifdef CONFIG_NUMA
 		/*
 		 * If there's a node specification, search for a partial
@@ -445,11 +456,15 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		spin_lock_irqsave(&slob_lock, flags);
 		//early_printk(KERN_ALERT "Locked the page\n");
 		sp->units = SLOB_UNITS(PAGE_SIZE);
-		sp->free = b;
+        
+        //Added a new page, increment free space by page size
+        slob_amt_free += sp->units;
+		
+        sp->free = b;
 		INIT_LIST_HEAD(&sp->list);
 		//early_printk(KERN_ALERT "Made the list head\n");
 		set_slob(b, SLOB_UNITS(PAGE_SIZE), b + SLOB_UNITS(PAGE_SIZE));
-		set_slob_page_free(sp, slob_list);
+		set_slob_page_free(sp, &slob_list);
 		b = slob_page_alloc(sp, size, align);
 		//early_printk(KERN_ALERT "Allocating a new block from inside the page\n");
 		if (!b)
@@ -501,7 +516,7 @@ static void slob_free(void *block, int size)
 		set_slob(b, units,
 			(void *)((unsigned long)(b +
 					SLOB_UNITS(PAGE_SIZE)) & PAGE_MASK));
-		set_slob_page_free(sp, &free_slob_small);
+		set_slob_page_free(sp, &slob_list);
 		goto out;
 	}
 
@@ -778,9 +793,9 @@ void __init kmem_cache_init_late(void)
 }
 
 SYSCALL_DEFINE0(sys_get_slob_amt_claimed) {
-    return 1;
+    return slob_amt_claimed;
 }
 
 SYSCALL_DEFINE0(sys_get_slob_amt_free) {
-    return 2;
+    return slob_amt_free;
 }

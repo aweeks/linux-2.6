@@ -339,8 +339,8 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 		return NULL;
     
     //Record memory as claimed    
-    slob_amt_claimed += size;
-    slob_amt_free -= size;
+    slob_amt_claimed += SLOB_UNITS(size);
+    slob_amt_free -= SLOB_UNITS(size);
     	
 	if (delta) { /* need to fragment head to align? */
 		next = slob_next(cur);

@@ -458,10 +458,10 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		//early_printk(KERN_ALERT "Locked the page\n");
 		sp->units = SLOB_UNITS(PAGE_SIZE);
         
-        	//Added a new page, increment free space by page size
-        	slob_amt_free += PAGE_SIZE;
+        //Added a new page, increment free space by page size
+        slob_amt_free += sp->units;
 		
-        	sp->free = b;
+        sp->free = b;
 		INIT_LIST_HEAD(&sp->list);
 		//early_printk(KERN_ALERT "Made the list head\n");
 		set_slob(b, SLOB_UNITS(PAGE_SIZE), b + SLOB_UNITS(PAGE_SIZE));
@@ -499,7 +499,7 @@ static void slob_free(void *block, int size)
 
 	spin_lock_irqsave(&slob_lock, flags);
     
-    slob_amt_claimed -= size;
+    slob_amt_claimed -= units;
 
 	if (sp->units + units == SLOB_UNITS(PAGE_SIZE)) {
 		/* Go directly to page allocator. Do not pass slob allocator */
@@ -510,7 +510,7 @@ static void slob_free(void *block, int size)
 		free_slob_page(sp);
 		slob_free_pages(b, 0);
 		
-        slob_amt_free -= PAGE_SIZE;
+        slob_amt_free -= SLOB_UNITS(PAGE_SIZE);
         return;
 	}
 

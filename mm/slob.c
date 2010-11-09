@@ -269,7 +269,9 @@ static void slob_free_pages(void *b, int order)
 	free_pages((unsigned long)b, order);
 }
 
-//Get the best fit size internal to a page
+/* 
+ * Get the best fit size internal to a page
+ */
 size_t get_best_fit_size(struct slob_page *sp, size_t size, int align){
 	int best_fit = 0;
 	
@@ -294,7 +296,6 @@ size_t get_best_fit_size(struct slob_page *sp, size_t size, int align){
             return 0;
 	}
 	
-	//early_printk(KERN_ALERT "you will RETURN with the best");
 	return best_fit;
 }
 
@@ -307,13 +308,11 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 	
 	slob_t *prev, *next, *cur, *aligned, *best_block = NULL;
 	
-	//printk(KERN_ALERT "Hello world\n"); //This is how we do it
 	int delta = 0, units = SLOB_UNITS(size);
 	slobidx_t avail;
 	
 	for (prev = NULL, cur = sp->free; ; prev = cur, cur = slob_next(cur)) 
 	{
-		//early_printk(KERN_ALERT "At block segment 0x%p\n", cur);
 		avail = slob_units(cur);
 		
 		if (align) 
@@ -326,7 +325,6 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 		{
 			best_block = cur;
 			best_fit = avail;
-			//break;
 
 		}
         	if (slob_last(cur))
@@ -338,7 +336,7 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 	if(!best_fit)
 		return NULL;
     
-    //Record memory as claimed    
+    /* Record memory as claimed */    
     slob_amt_claimed += SLOB_UNITS(size);
     slob_amt_free -= SLOB_UNITS(size);
     	
@@ -377,7 +375,6 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 {
 	struct slob_page *sp;
-	//struct list_head *prev;
 
 	slob_t *b = NULL;
 	unsigned long flags;
@@ -385,11 +382,7 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
     struct slob_page *best_fit_page;
 	size_t curr_size, best_size = 0;
 
-    //early_printk(KERN_ALERT "slob_alloc size: %u\n", size);
-
-
 	spin_lock_irqsave(&slob_lock, flags);
-	//early_printk(KERN_ALERT "I am still running\n");
 		/* Iterate through each partially free page, try to find room */
 	list_for_each_entry(sp, &slob_list, list) {
 #ifdef CONFIG_NUMA
@@ -401,7 +394,6 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		if (node != -1 && page_to_nid(&sp->page) != node)
 			continue;
 #endif
-		//early_printk(KERN_ALERT "At page 0x%p", sp);
 		
 		/* Enough room on this page? */
 		if (sp->units < SLOB_UNITS(size))
@@ -413,67 +405,36 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
             		best_size      = curr_size;
             		best_fit_page  = sp;
         	}
-		//early_printk(KERN_ALERT "Best size: %d", best_size);
-		/* Attempt to alloc */
-		/*prev = sp->list.prev;
-		b = slob_page_alloc(sp, size, align);
-		if (!b)
-			continue;
-
-		 Improve fragment distribution and reduce our average
-		 * search time by starting our next search here. (see
-		 * Knuth vol 1, sec 2.5, pg 449) */
-		/*if (prev != slob_list->prev &&
-				slob_list->next != prev->next)
-			list_move_tail(slob_list, prev->next);
-		break;*/
-		
 	}
-	//early_printk(KERN_ALERT "Missed the loop\n");
 	
 	if (best_size)
 		slob_page_alloc(best_fit_page, best_size, align);
 		
 	spin_unlock_irqrestore(&slob_lock, flags);
 
-	//early_printk(KERN_ALERT "Best size status: %d\n", best_size);
 	/* Not enough space: must allocate a new page */
 	if (!best_size) {
-
-		
-
-		//early_printk(KERN_ALERT "Not enough space: must allocate a new page\n");
-
-		
 		b = slob_new_pages(gfp & ~__GFP_ZERO, 0, node);
-		//early_printk(KERN_ALERT "Tried to get a new page\n");
 		
 		if (!b)
 			return NULL;
 		sp = slob_page(b);
 		set_slob_page(sp);
-		//early_printk(KERN_ALERT "Got a pointer, set the slob page\n");
 		
 		spin_lock_irqsave(&slob_lock, flags);
-		//early_printk(KERN_ALERT "Locked the page\n");
 		sp->units = SLOB_UNITS(PAGE_SIZE);
         
-        //Added a new page, increment free space by page size
         slob_amt_free += sp->units;
 		
         sp->free = b;
 		INIT_LIST_HEAD(&sp->list);
-		//early_printk(KERN_ALERT "Made the list head\n");
 		set_slob(b, SLOB_UNITS(PAGE_SIZE), b + SLOB_UNITS(PAGE_SIZE));
 		set_slob_page_free(sp, &slob_list);
 		b = slob_page_alloc(sp, size, align);
-		//early_printk(KERN_ALERT "Allocating a new block from inside the page\n");
 		if (!b)
-			//early_printk(KERN_ALERT "It was not able to get the memory");
 		BUG_ON(!b);
 		spin_unlock_irqrestore(&slob_lock, flags);
 	}
-	//early_printk(KERN_ALERT "Passed the if block.  Page was allocated.\n");
 	
 	if (unlikely((gfp & __GFP_ZERO) && b))
 		memset(b, 0, size);

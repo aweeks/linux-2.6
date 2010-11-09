@@ -335,7 +335,12 @@ static void *slob_page_alloc(struct slob_page *sp, size_t size, int align)
 	avail = best_fit;
 	cur = best_block;
 	if(!best_fit)
-		return NULL;	
+		return NULL;
+    
+    //Record memory as claimed    
+    slob_amt_claimed += size;
+    slob_amt_free -= size;
+    	
 	if (delta) { /* need to fragment head to align? */
 		next = slob_next(cur);
 		set_slob(aligned, avail - delta, next);
@@ -451,7 +456,11 @@ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
 		spin_lock_irqsave(&slob_lock, flags);
 		//early_printk(KERN_ALERT "Locked the page\n");
 		sp->units = SLOB_UNITS(PAGE_SIZE);
-		sp->free = b;
+        
+        //Added a new page, increment free space by page size
+        slob_amt_free += sp->units;
+		
+        sp->free = b;
 		INIT_LIST_HEAD(&sp->list);
 		//early_printk(KERN_ALERT "Made the list head\n");
 		set_slob(b, SLOB_UNITS(PAGE_SIZE), b + SLOB_UNITS(PAGE_SIZE));

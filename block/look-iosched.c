@@ -12,15 +12,16 @@
 #define REV 2
 
 struct look_data{
-	struct * list_head sentinel;
+	struct * look_queue queue;
 	int dir;
 	sector_t head_pos;
 };
 
-struct look_node {
+struct look_queue {
 	struct list_head queue;
 	sector_t beg_pos;
-	struct request *rq,
+	struct request *rq;
+	struct * look_data look_metadata;
 };
 
 static void look_merged_requests(struct request_queue *q, struct request *rq,
@@ -39,15 +40,17 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
 
 }
 
-static int look_dispatch(struct request_queue *q, int force)
+static int look_dispatch(struct look_queue *q, int force)
 {
-	struct look_data *nd = q->elevator->elevator_data;
+	struct look_data *nd = q->look_metadata;
 
 	if (!list_empty(&nd->queue)) {
 		struct request *rq;
+		// Change the below line to grab the appropriate node (either next OR prev, depending on dir)
 		rq = list_entry(nd->queue.next, struct request, queuelist);
 		list_del_init(&rq->queuelist);
 		elv_dispatch_sort(q, rq);
+		// Move the head to the appropriate position based on head_pos
 		return 1;
 	}
 	return 0;

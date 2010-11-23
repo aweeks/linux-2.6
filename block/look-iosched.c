@@ -45,8 +45,17 @@ static int look_dispatch(struct request_queue *q, int force)
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
+	
+	list_for_each_entry(nd, &(q->queue_head), list)
+	{
+		if (rq->"????" > nd->queue->"???" && )
+		{
+			new = tmp;
+		}
+	}
 
-	list_add_tail(&rq->queuelist, &nd->queue);
+	//list_add_tail(&rq->queuelist, &nd->queue);
+	
 }
 
 static int look_queue_empty(struct request_queue *q)

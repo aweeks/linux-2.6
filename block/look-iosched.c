@@ -20,11 +20,14 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 
 static in look_put_req_fn(struct request_queu *q, struct request *rq)
 {
-
+        rq->elevator_private = NULL;
+	rq->elevator_private2 = NULL;
 }
 
 static in look_set_req_fn(struct request_queu *q, struct request *rq)
 {
+	rq->elevator_private =  rq->bio->bi_sector;
+        rq->elevator_private2 = "???";
 
 }
 
@@ -46,7 +49,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
 	
-	list_for_each_entry(nd, &(q->queue_head), list)
+	list_for_each_entry(nd, &(q->ead), list)
 	{
 		if (rq->"????" > nd->queue->"???" && )
 		{

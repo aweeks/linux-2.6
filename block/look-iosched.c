@@ -18,6 +18,16 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 	list_del_init(&next->queuelist);
 }
 
+static in look_put_req_fn(struct request_queu *q, struct request *rq)
+{
+
+}
+
+static in look_set_req_fn(struct request_queu *q, struct request *rq)
+{
+
+}
+
 static int look_dispatch(struct request_queue *q, int force)
 {
 	struct look_data *nd = q->elevator->elevator_data;

@@ -8,8 +8,8 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 
-#define FWD 1
-#define REV 2
+#define FWD 1 //This is "next" on the list
+#define REV 2 //This is "prev" on the list
 
 struct look_data{
 	struct * list_head sentinel;
@@ -39,6 +39,14 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
 
 }
 
+/*
+ * TODO:
+ * I/O schedulers are free to postpone requests by
+	not filling the dispatch queue unless @force
+	is non-zero.  Once dispatched, I/O schedulers
+	are not allowed to manipulate the requests -
+	they belong to generic dispatch queue.
+ */ 
 static int look_dispatch(struct request_queue *q, int force)
 {
 	struct look_data *nd = q->elevator->elevator_data;

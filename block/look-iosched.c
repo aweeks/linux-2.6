@@ -8,8 +8,19 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 
-struct look_data {
+#define FWD 1
+#define REV 2
+
+struct look_data{
+	struct * list_head sentinel;
+	int dir;
+	sector_t head_pos;
+};
+
+struct look_node {
 	struct list_head queue;
+	sector_t beg_pos;
+	struct request *rq,
 };
 
 static void look_merged_requests(struct request_queue *q, struct request *rq,

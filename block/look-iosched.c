@@ -8,19 +8,20 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 
-#define FWD 1
-#define REV 2
+#define FWD 1 //This is "next" on the list
+#define REV 2 //This is "prev" on the list
 
 struct look_data{
-	struct * list_head sentinel;
+	struct * look_queue queue;
 	int dir;
 	sector_t head_pos;
 };
 
-struct look_node {
+struct look_queue {
 	struct list_head queue;
 	sector_t beg_pos;
-	struct request *rq,
+	struct request *rq;
+	struct * look_data look_metadata;
 };
 
 static void look_merged_requests(struct request_queue *q, struct request *rq,
@@ -31,23 +32,39 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 
 static in look_put_req_fn(struct request_queu *q, struct request *rq)
 {
-
+        rq->elevator_private = NULL;
+	rq->elevator_private2 = NULL;
 }
 
 static in look_set_req_fn(struct request_queu *q, struct request *rq)
 {
+	rq->elevator_private =  rq->bio->bi_sector;
+        rq->elevator_private2 = "???";
 
 }
 
-static int look_dispatch(struct request_queue *q, int force)
+<<<<<<< HEAD
+/*
+ * TODO:
+ * I/O schedulers are free to postpone requests by
+	not filling the dispatch queue unless @force
+	is non-zero.  Once dispatched, I/O schedulers
+	are not allowed to manipulate the requests -
+	they belong to generic dispatch queue.
+ */ 
+
+static int look_dispatch(struct look_queue *q, int force)
+>>>>>>> 99a715c6fedb30ec599ac9593a02a4d35c137f4a
 {
-	struct look_data *nd = q->elevator->elevator_data;
+	struct look_data *nd = q->look_metadata;
 
 	if (!list_empty(&nd->queue)) {
 		struct request *rq;
+		// Change the below line to grab the appropriate node (either next OR prev, depending on dir)
 		rq = list_entry(nd->queue.next, struct request, queuelist);
 		list_del_init(&rq->queuelist);
 		elv_dispatch_sort(q, rq);
+		// Move the head to the appropriate position based on head_pos
 		return 1;
 	}
 	return 0;
@@ -56,20 +73,14 @@ static int look_dispatch(struct request_queue *q, int force)
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
-
-    struct look_node *curr;
-    if( request->bio->bi_sector > nd->head_position ) {
-	    list_for_each_entry(curr, &nd, sentinel)
-	    {
-            if 
-	    }
-    } else {
-	    list_for_each_entry_reverse(curr, &nd, sentinel)
-        {
-	    
-        {
-    }
-
+	
+	list_for_each_entry(nd, &(q->ead), list)
+	{
+		if (rq->"????" > nd->queue->"???" && )
+		{
+			new = tmp;
+		}
+	}
 
 	//list_add_tail(&rq->queuelist, &nd->queue);
 	

@@ -1,6 +1,11 @@
 /*
- * elevator look
- */
+ * The Look Scheduler is an elevator-type IO Scheduler.  Requests are
+ * dispatched based on the current sector, the requests sector, and the
+ * direction that the arm is progressing
+ * 
+ * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal
+ */ 
+
 #include <linux/blkdev.h>
 #include <linux/elevator.h>
 #include <linux/bio.h>
@@ -11,6 +16,12 @@
 #define FWD 1 //This is "next" on the list
 #define REV 2 //This is "prev" on the list
 
+/**
+* struct look_data - short description
+* @queue: 
+* @dir: the direction that the head is head
+*
+*/ 
 struct look_data{
 	struct * look_queue queue;
 	int dir;
@@ -43,7 +54,6 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
 
 }
 
-<<<<<<< HEAD
 /*
  * TODO:
  * I/O schedulers are free to postpone requests by
@@ -54,7 +64,6 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
  */ 
 
 static int look_dispatch(struct look_queue *q, int force)
->>>>>>> 99a715c6fedb30ec599ac9593a02a4d35c137f4a
 {
 	struct look_data *nd = q->look_metadata;
 

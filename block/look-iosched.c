@@ -43,7 +43,6 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
 
 }
 
-<<<<<<< HEAD
 /*
  * TODO:
  * I/O schedulers are free to postpone requests by
@@ -54,7 +53,6 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
  */ 
 
 static int look_dispatch(struct look_queue *q, int force)
->>>>>>> 99a715c6fedb30ec599ac9593a02a4d35c137f4a
 {
 	struct look_data *nd = q->look_metadata;
 

@@ -3,7 +3,7 @@
  * dispatched based on the current sector, the requests sector, and the
  * direction that the arm is progressing
  * 
- * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal
+ * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordahl
  */ 
 
 #include <linux/blkdev.h>
@@ -62,7 +62,6 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 * @q: the request_queue
 * @rq: the request
 *
-* Frees the request from the queue.  Returns 1 if successful
 */
 static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
@@ -75,7 +74,6 @@ static void look_put_req_fn(struct request_queue *q, struct request *rq)
 * @q: the request_queue
 * @rq: the request
 *
-* Allocates the request into the queue.  Returns 1 if successful
 */
 static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {

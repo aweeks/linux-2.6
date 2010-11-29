@@ -159,8 +159,13 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 list_add( &new->queue, &pos->queue );
                 break;
             }
+            
+            /* We should never reach this code, if we do, then we made a fail */
+            early_printk("Queue integrity error, continuing\n");
+            list_add(&new->queue, &pos->queue);
 	    }
-    } else {
+    } else
+    {
         /* The new request is before the current head position, search backwards */
 	    list_for_each_entry_reverse(c, &nd, queue)
         {

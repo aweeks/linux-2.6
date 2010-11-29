@@ -32,15 +32,15 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 
 static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
-	struct look_data *nd;
+	struct look_queue *nd;
         rq->elevator_private = kmalloc(sizeof(*nd), GFP_KERNEL);
 	rq->elevator_private2 = NULL;
 }
 
 static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
-	rq->elevator_private =kfree();
-        rq->elevator_private2 = "???";
+	rq->elevator_private = kfree();
+        rq->elevator_private2 = NULL;
 
 }
 

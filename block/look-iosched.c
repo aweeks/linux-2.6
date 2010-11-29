@@ -64,9 +64,10 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 *
 * Frees the request from the queue.  Returns 1 if successful
 */
-static in look_put_req_fn(struct request_queu *q, struct request *rq)
+static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
-        rq->elevator_private = NULL;
+	struct look_queue *nd;
+        rq->elevator_private = kmalloc(sizeof(*nd), GFP_KERNEL);
 	rq->elevator_private2 = NULL;
 }
 
@@ -77,10 +78,10 @@ static in look_put_req_fn(struct request_queu *q, struct request *rq)
 *
 * Allocates the request into the queue.  Returns 1 if successful
 */
-static in look_set_req_fn(struct request_queu *q, struct request *rq)
+static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
-	rq->elevator_private =  rq->bio->bi_sector;
-        rq->elevator_private2 = "???";
+	rq->elevator_private = kfree();
+        rq->elevator_private2 = NULL;
 
 }
 
@@ -125,16 +126,51 @@ static int look_dispatch(struct look_queue *q, int force)
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
-	
-	list_for_each_entry(nd, &(q->ead), list)
-	{
-		if (rq->"????" > nd->queue->"???" && )
-		{
-			new = tmp;
-		}
-	}
 
-	//list_add_tail(&rq->queuelist, &nd->queue);
+    /*Allocate a new look_node for the request, and initialize it */
+    struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL)
+    INIT_LIST_HEAD(&new->queue);
+    new->rq = rq;
+    new->beg_pos = rq->bio->bi_sector;
+    new->look_metadata = nd;
+
+    struct look_queue *pos, *next;
+    if( new->beg_pos > nd->head_position ) {
+
+        /* The new request is after the current head position, search forward */
+        list_for_each_entry(pos, &nd, queue)
+	    {
+            /* If we are at the end of the list, insert here */
+            if( pos->queue->next == nd->queue )
+            {
+                list_add( &new->queue, &pos->queue );
+                break;
+            }
+            
+            /* We are not at the end of the list, fetch the next entry */
+            next = list_entry( &new->queue->next, struct look_queue, queue );
+
+            /* If pos < new < next, insert here */
+            if( pos->beg_pos < new->beg_pos &&  new->beg_pos < next->beg_pos )
+            {
+                list_add( &new->queue, &pos->queue );
+                break;
+            }
+
+            /* If next < pos, then we have reached the end of this side of the queue, insert here */
+            if( next->beg_pos < pos->beg_pos )
+            {
+                list_add( &new->queue, &pos->queue );
+                break;
+            }
+	    }
+    } else {
+        /* The new request is before the current head position, search backwards */
+	    list_for_each_entry_reverse(c, &nd, queue)
+        {
+	       //TODO 
+        {
+    }
 	
 }
 
@@ -213,6 +249,7 @@ static void *look_init_fn(struct request_queue *q)
 static void look_exit_fn(struct request_queue *q)
 {
 	struct look_data *nd = e->elevator_data;
+kmalloc_node(sizeof(*nd), GFP_KERNEL, q->node);
 
 	BUG_ON(!list_empty(&nd->queue));
 	kfree(nd);
@@ -255,7 +292,6 @@ static void __exit look_exit(void)
 
 module_init(look_init);
 module_exit(look_exit);
-
 
 MODULE_AUTHOR("Jens Axboe, Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal");
 MODULE_LICENSE("GPL");

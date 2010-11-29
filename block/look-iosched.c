@@ -30,20 +30,20 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 	list_del_init(&next->queuelist);
 }
 
-static in look_put_req_fn(struct request_queu *q, struct request *rq)
+static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
-        rq->elevator_private = NULL;
+	struct look_queue *nd;
+        rq->elevator_private = kmalloc(sizeof(*nd), GFP_KERNEL);
 	rq->elevator_private2 = NULL;
 }
 
-static in look_set_req_fn(struct request_queu *q, struct request *rq)
+static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
-	rq->elevator_private =  rq->bio->bi_sector;
-        rq->elevator_private2 = "???";
+	rq->elevator_private = kfree();
+        rq->elevator_private2 = NULL;
 
 }
 
-<<<<<<< HEAD
 /*
  * TODO:
  * I/O schedulers are free to postpone requests by
@@ -54,7 +54,6 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
  */ 
 
 static int look_dispatch(struct look_queue *q, int force)
->>>>>>> 99a715c6fedb30ec599ac9593a02a4d35c137f4a
 {
 	struct look_data *nd = q->look_metadata;
 
@@ -162,6 +161,7 @@ static void *look_init_queue(struct request_queue *q)
 static void look_exit_queue(struct elevator_queue *e)
 {
 	struct look_data *nd = e->elevator_data;
+kmalloc_node(sizeof(*nd), GFP_KERNEL, q->node);
 
 	BUG_ON(!list_empty(&nd->queue));
 	kfree(nd);
@@ -198,6 +198,6 @@ module_init(look_init);
 module_exit(look_exit);
 
 
-MODULE_AUTHOR("Jens Axboe");
+MODULE_AUTHOR("Alex Weeks,Josh Jordahl, Kevin McIntosh, Tyler McLung ");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("No-op IO scheduler");
+MODULE_DESCRIPTION("Look IO scheduler");

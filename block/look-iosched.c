@@ -24,7 +24,7 @@
 *
 */ 
 struct look_data{
-	struct * look_queue queue;
+	struct * request_queue queue;
 	int dir;
 	sector_t head_pos;
 };
@@ -83,15 +83,6 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 
 }
 
-/*
- * TODO:
- * I/O schedulers are free to postpone requests by
-	not filling the dispatch queue unless @force
-	is non-zero.  Once dispatched, I/O schedulers
-	are not allowed to manipulate the requests -
-	they belong to generic dispatch queue.
- */ 
-
 /**
 * look_dispatch - sends the next request to the dispatch queue
 * @q: scheduler queue
@@ -99,17 +90,29 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 * 
 * Requests are dispatched via "elevator" algorithm.  Returns success
 */
-static int look_dispatch(struct look_queue *q, int force)
+static int look_dispatch(struct request_queue *q, int force)
 {
-	struct look_data *nd = q->look_metadata;
+	struct look_data *ld = q->elevator->elevator_data;
 
 	if (!list_empty(&nd->queue)) {
 		struct request *rq;
-		// Change the below line to grab the appropriate node (either next OR prev, depending on dir)
-		rq = list_entry(nd->queue.next, struct request, queuelist);
+		
+		if (ld->dir == FWD)
+		{
+			rq = list_entry(ld->queue.next, struct request, queuelist);
+		}
+		else
+		{
+			rq = list_entry(ld->queue.prev, struct request, queuelist);
+		}
 		list_del_init(&rq->queuelist);
-		elv_dispatch_sort(q, rq);
-		// Move the head to the appropriate position based on head_pos
+		
+		elv_dispatch_add_tail(q, rq);
+		
+		ld->head_pos = q->end_sector;
+		
+		// TODO: Reinsert the head of the list in the correct location
+		//list_for_each_entry(ld, &(q->queue_head)
 		return 1;
 	}
 	return 0;
@@ -157,8 +160,13 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 list_add( &new->queue, &pos->queue );
                 break;
             }
+            
+            /* We should never reach this code, if we do, then we made a fail */
+            early_printk("Queue integrity error, continuing\n");
+            list_add(&new->queue, &pos->queue);
 	    }
-    } else {
+    } else
+    {
         /* The new request is before the current head position, search backwards */
 	    list_for_each_entry_reverse(c, &nd, queue)
         {

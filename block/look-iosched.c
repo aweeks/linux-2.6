@@ -1,6 +1,11 @@
 /*
- * elevator look
- */
+ * The Look Scheduler is an elevator-type IO Scheduler.  Requests are
+ * dispatched based on the current sector, the requests sector, and the
+ * direction that the arm is progressing
+ * 
+ * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal
+ */ 
+
 #include <linux/blkdev.h>
 #include <linux/elevator.h>
 #include <linux/bio.h>
@@ -11,18 +16,54 @@
 #define FWD 1 //This is "next" on the list
 #define REV 2 //This is "prev" on the list
 
+/**
+* struct look_data - points to the queue of requests
+* @queue: points to the queue of requests
+* @dir: uses macros FWD and REV
+* @head_pos: the end of the last dispatched request
+*
+*/ 
 struct look_data{
 	struct * request_queue queue;
 	int dir;
 	sector_t head_pos;
 };
 
+/**
+* struct look_queue - holds the request
+* @queue: a linked list node
+* @beg_pos: beggining sector of the request
+* @rq: the IO request
+* @look_metadata
+*/ 
+struct look_queue {
+	struct list_head queue;
+	sector_t beg_pos;
+	struct request *rq;
+	struct * look_data look_metadata;
+};
+
+/**
+* look_merged_requests - Merge requests
+* @q: the request queue the holds these requests
+* @rq: the first request
+* @next: the next request
+*
+* Delete the request from the queue because it was merged
+*/
 static void look_merged_requests(struct request_queue *q, struct request *rq,
 				 struct request *next)
 {
 	list_del_init(&next->queuelist);
 }
 
+/**
+* look_put_req_fn - Free request
+* @q: the request_queue
+* @rq: the request
+*
+* Frees the request from the queue.  Returns 1 if successful
+*/
 static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
 	struct look_queue *nd;
@@ -30,6 +71,13 @@ static void look_put_req_fn(struct request_queue *q, struct request *rq)
 	rq->elevator_private2 = NULL;
 }
 
+/**
+* look_put_req_fn - Allocate request
+* @q: the request_queue
+* @rq: the request
+*
+* Allocates the request into the queue.  Returns 1 if successful
+*/
 static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
 	rq->elevator_private = kfree();
@@ -37,15 +85,13 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 
 }
 
-/*
- * TODO:
- * I/O schedulers are free to postpone requests by
-	not filling the dispatch queue unless @force
-	is non-zero.  Once dispatched, I/O schedulers
-	are not allowed to manipulate the requests -
-	they belong to generic dispatch queue.
- */ 
-
+/**
+* look_dispatch - sends the next request to the dispatch queue
+* @q: scheduler queue
+* @force: postpone requests
+* 
+* Requests are dispatched via "elevator" algorithm.  Returns success
+*/
 static int look_dispatch(struct request_queue *q, int force)
 {
 	struct look_data *ld = q->elevator->elevator_data;
@@ -53,7 +99,6 @@ static int look_dispatch(struct request_queue *q, int force)
 	if (!list_empty(&nd->queue)) {
 		struct request *rq;
 		
-		// Get the next request
 		if (ld->dir == FWD)
 		{
 			rq = list_entry(ld->queue.next, struct request, queuelist);
@@ -64,34 +109,34 @@ static int look_dispatch(struct request_queue *q, int force)
 		}
 		list_del_init(&rq->queuelist);
 		
-		// Dispatch (without sort)
 		elv_dispatch_add_tail(q, rq);
 		
-		// Move the head to the appropriate position based on head_pos
 		ld->head_pos = q->end_sector;
 		
-		// Reinsert the head of the list in the correct location
+		// TODO: Reinsert the head of the list in the correct location
 		//list_for_each_entry(ld, &(q->queue_head)
 		return 1;
 	}
 	return 0;
 }
 
+/**
+* look_add_request - add request to IO Scheduler queue
+* @q: the look queue
+* @rq: the request to be added
+*
+*/
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
 
-    /*Allocate a new look_node for the request, and initialize it */
-    struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL)
-    INIT_LIST_HEAD(&new->queue);
-    new->rq = rq;
-    new->beg_pos = rq->bio->bi_sector;
-    new->look_metadata = nd;
+    /* Get the new request  */
+    struct look_queue *new = rq->elevator_private;
 
     struct look_queue *pos, *next;
     if( new->beg_pos > nd->head_position ) {
-
         /* The new request is after the current head position, search forward */
+        
         list_for_each_entry(pos, &nd, queue)
 	    {
             /* If we are at the end of the list, insert here */
@@ -128,6 +173,13 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 	
 }
 
+/**
+* look_queue_empty - Is the queue empty
+* @q: the request_queue
+*
+* Documentation in biodoc.txt states that drivers should not use this function 
+* but rather check if elv_next_request is NULL.  Returns 1 or 0
+*/
 static int look_queue_empty(struct request_queue *q)
 {
 	struct look_data *nd = q->elevator->elevator_data;
@@ -135,8 +187,15 @@ static int look_queue_empty(struct request_queue *q)
 	return list_empty(&nd->queue);
 }
 
+/**
+* look_former_req_fn - get the request before rq
+* @rq: a request
+* @q: the request queue that rq is in
+* 
+* Return a pointer to the request struct
+*/
 static struct request *
-look_former_request(struct request_queue *q, struct request *rq)
+look_former_req_fn(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
 
@@ -145,8 +204,15 @@ look_former_request(struct request_queue *q, struct request *rq)
 	return list_entry(rq->queuelist.prev, struct request, queuelist);
 }
 
+/**
+* look_latter_req_fn - get the request after rq
+* @rq: a request
+* @q: the request queue that rq is in
+* 
+* Return a pointer to the request struct
+*/
 static struct request *
-look_latter_request(struct request_queue *q, struct request *rq)
+look_latter_req_fn(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
 
@@ -155,7 +221,11 @@ look_latter_request(struct request_queue *q, struct request *rq)
 	return list_entry(rq->queuelist.next, struct request, queuelist);
 }
 
-static void *look_init_queue(struct request_queue *q)
+/**
+* look_init_fn - allocate memory for a request_queue
+* @q: empty pointer to q
+*/
+static void *look_init_fn(struct request_queue *q)
 {
 	struct look_data *nd;
 
@@ -166,7 +236,16 @@ static void *look_init_queue(struct request_queue *q)
 	return nd;
 }
 
-static void look_exit_queue(struct elevator_queue *e)
+/**
+* look_exit_fn -  deallocates memory allocated in look_init_fn
+* @q: the request queue
+*
+* called when scheduler is relieved of its scheduling duties for a disk
+*/
+
+//TODO: Had to change the function name to work with the definition.
+//Still need to change the inner workings of the function
+static void look_exit_fn(struct request_queue *q)
 {
 	struct look_data *nd = e->elevator_data;
 kmalloc_node(sizeof(*nd), GFP_KERNEL, q->node);
@@ -175,6 +254,13 @@ kmalloc_node(sizeof(*nd), GFP_KERNEL, q->node);
 	kfree(nd);
 }
 
+/**
+* struct look_data - the elevator qu
+* @.ops: pointers to the functions of this struct.
+* @.elevator_name: the name of this type of elevator
+* @.elevator_owner: owner of elevator 
+*
+*/ 
 static struct elevator_type elevator_look = {
 	.ops = {
 		.elevator_merge_req_fn		= look_merged_requests,
@@ -190,6 +276,7 @@ static struct elevator_type elevator_look = {
 	.elevator_owner = THIS_MODULE,
 };
 
+/**Private functions**/
 static int __init look_init(void)
 {
 	elv_register(&elevator_look);
@@ -205,7 +292,6 @@ static void __exit look_exit(void)
 module_init(look_init);
 module_exit(look_exit);
 
-
-MODULE_AUTHOR("Alex Weeks,Josh Jordahl, Kevin McIntosh, Tyler McLung ");
+MODULE_AUTHOR("Jens Axboe, Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Look IO scheduler");
+MODULE_DESCRIPTION("Look Scheduler IO scheduler");

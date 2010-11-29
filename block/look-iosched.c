@@ -12,16 +12,9 @@
 #define REV 2 //This is "prev" on the list
 
 struct look_data{
-	struct * look_queue queue;
+	struct * request_queue queue;
 	int dir;
 	sector_t head_pos;
-};
-
-struct look_queue {
-	struct list_head queue;
-	sector_t beg_pos;
-	struct request *rq;
-	struct * look_data look_metadata;
 };
 
 static void look_merged_requests(struct request_queue *q, struct request *rq,
@@ -30,13 +23,13 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 	list_del_init(&next->queuelist);
 }
 
-static in look_put_req_fn(struct request_queu *q, struct request *rq)
+static in look_put_req_fn(struct request_queue *q, struct request *rq)
 {
         rq->elevator_private = NULL;
 	rq->elevator_private2 = NULL;
 }
 
-static in look_set_req_fn(struct request_queu *q, struct request *rq)
+static in look_set_req_fn(struct request_queue *q, struct request *rq)
 {
 	rq->elevator_private =  rq->bio->bi_sector;
         rq->elevator_private2 = "???";
@@ -52,17 +45,32 @@ static in look_set_req_fn(struct request_queu *q, struct request *rq)
 	they belong to generic dispatch queue.
  */ 
 
-static int look_dispatch(struct look_queue *q, int force)
+static int look_dispatch(struct request_queue *q, int force)
 {
-	struct look_data *nd = q->look_metadata;
+	struct look_data *ld = q->elevator->elevator_data;
 
 	if (!list_empty(&nd->queue)) {
 		struct request *rq;
-		// Change the below line to grab the appropriate node (either next OR prev, depending on dir)
-		rq = list_entry(nd->queue.next, struct request, queuelist);
+		
+		// Get the next request
+		if (ld->dir == FWD)
+		{
+			rq = list_entry(ld->queue.next, struct request, queuelist);
+		}
+		else
+		{
+			rq = list_entry(ld->queue.prev, struct request, queuelist);
+		}
 		list_del_init(&rq->queuelist);
-		elv_dispatch_sort(q, rq);
+		
+		// Dispatch (without sort)
+		elv_dispatch_add_tail(q, rq);
+		
 		// Move the head to the appropriate position based on head_pos
+		ld->head_pos = q->end_sector;
+		
+		// Reinsert the head of the list in the correct location
+		//list_for_each_entry(ld, &(q->queue_head)
 		return 1;
 	}
 	return 0;

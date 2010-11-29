@@ -73,17 +73,13 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
 
-    /*Allocate a new look_node for the request, and initialize it */
-    struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL)
-    INIT_LIST_HEAD(&new->queue);
-    new->rq = rq;
-    new->beg_pos = rq->bio->bi_sector;
-    new->look_metadata = nd;
+    /* Get the new request  */
+    struct look_queue *new = rq->elevator_private;
 
     struct look_queue *pos, *next;
     if( new->beg_pos > nd->head_position ) {
-
         /* The new request is after the current head position, search forward */
+        
         list_for_each_entry(pos, &nd, queue)
 	    {
             /* If we are at the end of the list, insert here */

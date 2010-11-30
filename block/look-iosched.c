@@ -76,8 +76,9 @@ static void look_put_req_fn(struct request_queue *q, struct request *rq)
 */
 static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
-	rq->elevator_private = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
-        INIT_LIST_HEAD(&rq->elevator_private->queue);
+	struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL)
+        INIT_LIST_HEAD(&new->queue);
+	rq->elevator_private = new 
 }
 
 /*

@@ -172,17 +172,17 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     if( new->beg_pos > nd->head_pos ) {
 
         /* The new request is after the current head position, search forward */
-        list_for_each_entry(pos, &nd, queue)
+        list_for_each_entry(pos, nd, queue)
 	    {
             /* If we are at the end of the list, insert here */
-            if( pos->queue.next == nd->queue )
+            if( pos->queue.next == &nd->queue )
             {
                 list_add( &new->queue, &pos->queue );
                 break;
             }
             
             /* We are not at the end of the list, fetch the next entry */
-            next = list_entry( &new->queue->next, struct look_queue, queue );
+            next = list_entry( &new->queue.next, struct look_queue, queue );
 
             /* If pos < new < next, insert here */
             if( pos->beg_pos < new->beg_pos &&  new->beg_pos < next->beg_pos )
@@ -281,7 +281,7 @@ static void *look_init_queue(struct request_queue *q)
 //Still need to change the inner workings of the function
 static void look_exit_queue(struct elevator_queue *e)
 {
-	struct noop_data *nd = e->elevator_data;
+	struct look_data *nd = e->elevator_data;
 
 	BUG_ON(!list_empty(&nd->queue));
 	kfree(nd);

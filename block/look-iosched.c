@@ -174,7 +174,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     if( new->beg_pos > nd->head_pos ) {
 
         /* The new request is after the current head position, search forward */
-        list_for_each_entry(pos, &nd.queue, queue)
+        list_for_each_entry(pos, &nd->queue, queue)
 	    {
             /* If we are at the end of the list, insert here */
             if( pos->queue.next == &nd->queue )

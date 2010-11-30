@@ -97,17 +97,53 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 * 
 * Requests are dispatched via "elevator" algorithm.  Returns success
 */
-static int look_dispatch(struct look_queue *q, int force)
+static int look_dispatch(struct request_queue *q, int force)
 {
-	struct look_data *nd = q->look_metadata;
+	struct look_data *ld = q->elevator->elevator_data;
 
-	if (!list_empty(&nd->queue)) {
-		struct request *rq;
-		// Change the below line to grab the appropriate node (either next OR prev, depending on dir)
-		rq = list_entry(nd->queue.next, struct request, queuelist);
-		list_del_init(&rq->queuelist);
-		elv_dispatch_sort(q, rq);
-		// Move the head to the appropriate position based on head_pos
+	if (!list_empty(&ld->queue)) {
+		struct look_queue *rq;
+		if (ld->dir == FWD)
+		{
+			rq = list_entry(ld->queue.next, struct look_queue, queue);
+			if (rq->beg_pos < ld->head_pos)
+			{
+				ld->dir = REV;
+				rq = list_entry(ld->queue.prev, struct look_queue, queue);			
+			}
+		}
+		else
+		{
+			rq = list_entry(ld->queue.prev, struct look_queue, queue);			
+			if (rq->beg_pos > ld->head_pos)
+			{
+				ld->dir = FWD;
+				rq = list_entry(ld->queue.prev, struct look_queue, queue);			
+			}
+		}
+
+		list_del_init(&rq->queue);
+		elv_dispatch_add_tail(q, rq->rq);
+		ld->head_pos = rq->rq->end_sector;
+		
+		if (ld->dir == FWD)
+		{
+			struct look_queue *pos;
+	       		list_for_each_entry(pos, &ld, queue)
+			{
+				if (pos->beg_pos >= ld->head_pos)
+				{
+					break;
+				}
+			}
+			ld->queue->queue.prev->next = ld->queue->queue.next;
+			ld->queue->queue.next->prev = ld->queue->queue.prev;
+			ld->queue->queue.next = &(pos->queue);
+			ld->queue->queue.prev = pos->queue.prev;
+			pos->queue.prev->next = &(ld->queue->queue);
+			pos->queue.prev = &(ld->queue->queue);
+		}
+
 		return 1;
 	}
 	return 0;
@@ -134,7 +170,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     if( new->beg_pos > nd->head_position ) {
 
         /* The new request is after the current head position, search forward */
-        list_for_each_entry(pos, &nd, queue)
+            list_for_each_entry(pos, &nd, queue)
 	    {
             /* If we are at the end of the list, insert here */
             if( pos->queue->next == nd->queue )

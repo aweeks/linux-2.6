@@ -136,12 +136,12 @@ static int look_dispatch(struct request_queue *q, int force)
 					break;
 				}
 			}
-			ld->queue->queue.prev->next = ld->queue->queue.next;
-			ld->queue->queue.next->prev = ld->queue->queue.prev;
-			ld->queue->queue.next = &(pos->queue);
-			ld->queue->queue.prev = pos->queue.prev;
-			pos->queue.prev->next = &(ld->queue->queue);
-			pos->queue.prev = &(ld->queue->queue);
+			ld->queue.prev->next = ld->queue.next;
+			ld->queue.next->prev = ld->queue.prev;
+			ld->queue.next = &(pos->queue);
+			ld->queue.prev = pos->queue.prev;
+			pos->queue.prev->next = &(ld->queue);
+			pos->queue.prev = &(ld->queue);
 		}
 
 		return 1;

@@ -1,4 +1,4 @@
-o "-----"
+echo "-----"
 echo "Executing the make commands"
 echo "------\n"
 

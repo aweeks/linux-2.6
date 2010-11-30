@@ -169,11 +169,9 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 	    }
     } else
     {
-        /* The new request is before the current head position, search backwards */
-	    list_for_each_entry_reverse(c, &nd, queue)
-        {
-	       //TODO 
-        {
+        // The new request is before the current head position, search backwards */
+         early_printk("Reverse, not implemented\n");
+         list_add(&new->queue, &nd->queue);
     }
 	
 }

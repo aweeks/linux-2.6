@@ -24,7 +24,7 @@
 *
 */ 
 struct look_data{
-	struct look_queue *queue;
+	struct list_head queue;
 	int dir;
 	sector_t head_pos;
 };
@@ -97,7 +97,7 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 * 
 * Requests are dispatched via "elevator" algorithm.  Returns success
 */
-static int look_dispatch(struct look_queue *q, int force)
+static int look_dispatch(struct request_queue *q, int force)
 {
 	struct look_data *nd = q->elevator->elevator_data;
 

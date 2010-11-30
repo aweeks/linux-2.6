@@ -26,4 +26,6 @@ echo "Moving the file over"
 
 cp ./arch/i386/boot/bzImage /boot/vmlinuz-2.6.34.7
 
+modprobe look-iosched
+
 echo "Restart to finish the installation" 

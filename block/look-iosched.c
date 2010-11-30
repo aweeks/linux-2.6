@@ -162,11 +162,13 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 
     /*Allocate a new look_node for the request, and initialize it */
     struct look_queue *new;
-    
     new = rq->elevator_private;
+    
     new->rq = rq;
     new->beg_pos = rq->bio->bi_sector;
     new->look_metadata = nd;
+
+    printk("[LOOK] add <direction> %d", new->beg_pos);
 
 
     if( new->beg_pos > nd->head_pos ) {

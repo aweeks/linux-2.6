@@ -24,7 +24,7 @@
 *
 */ 
 struct look_data{
-	struct * look_queue queue;
+	struct look_queue *queue;
 	int dir;
 	sector_t head_pos;
 };
@@ -40,7 +40,7 @@ struct look_queue {
 	struct list_head queue;
 	sector_t beg_pos;
 	struct request *rq;
-	struct * look_data look_metadata;
+	struct look_data *look_metadata;
 };
 
 /**
@@ -65,7 +65,7 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 */
 static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
-	rq->elevator_private = kfree();
+	kfree(rq->elevator_private);
 }
 
 /**
@@ -76,9 +76,9 @@ static void look_put_req_fn(struct request_queue *q, struct request *rq)
 */
 static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
-	struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL)
-        INIT_LIST_HEAD(&new->queue);
-	rq->elevator_private = new 
+	struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
+    INIT_LIST_HEAD(&new->queue);
+	rq->elevator_private = new;
 }
 
 /*

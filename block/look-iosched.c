@@ -161,9 +161,9 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     struct look_queue *pos, *next;
 
     /*Allocate a new look_node for the request, and initialize it */
-    struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
+    struct look_queue *new;
     
-    INIT_LIST_HEAD(&new->queue);
+    new = rq->elevator_private;
     new->rq = rq;
     new->beg_pos = rq->bio->bi_sector;
     new->look_metadata = nd;

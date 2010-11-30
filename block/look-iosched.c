@@ -24,7 +24,7 @@
 *
 */ 
 struct look_data{
-	struct look_queue *queue;
+	struct list_head queue;
 	int dir;
 	sector_t head_pos;
 };

@@ -129,7 +129,7 @@ static int look_dispatch(struct request_queue *q, int force)
 		if (ld->dir == FWD)
 		{
 			struct look_queue *pos;
-	       		list_for_each_entry(pos, &ld, queue)
+			list_for_each_entry(pos, &(ld->queue), queue)
 			{
 				if (pos->beg_pos >= ld->head_pos)
 				{

@@ -124,7 +124,7 @@ static int look_dispatch(struct request_queue *q, int force)
 
 		list_del_init(&rq->queue);
 		elv_dispatch_add_tail(q, rq->rq);
-		ld->head_pos = rq->rq->end_sector;
+		ld->head_pos = rq->beg_pos + blk_rq_sectors(rq->rq) - 1;
 		
 		if (ld->dir == FWD)
 		{

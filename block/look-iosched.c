@@ -158,22 +158,24 @@ static int look_dispatch(struct request_queue *q, int force)
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
 	struct look_data *nd = q->elevator->elevator_data;
+    struct look_queue *pos, *next;
 
     /*Allocate a new look_node for the request, and initialize it */
-    struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL)
+    struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
+    
     INIT_LIST_HEAD(&new->queue);
     new->rq = rq;
     new->beg_pos = rq->bio->bi_sector;
     new->look_metadata = nd;
 
-    struct look_queue *pos, *next;
-    if( new->beg_pos > nd->head_position ) {
+
+    if( new->beg_pos > nd->head_pos ) {
 
         /* The new request is after the current head position, search forward */
-            list_for_each_entry(pos, &nd, queue)
+        list_for_each_entry(pos, &nd, queue)
 	    {
             /* If we are at the end of the list, insert here */
-            if( pos->queue->next == nd->queue )
+            if( pos->queue.next == nd->queue )
             {
                 list_add( &new->queue, &pos->queue );
                 break;

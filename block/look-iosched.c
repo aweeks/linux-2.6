@@ -121,7 +121,10 @@ static int look_dispatch(struct request_queue *q, int force)
 				rq = list_entry(ld->queue.prev, struct look_queue, queue);			
 			}
 		}
-
+		//Kevin: I could not find the macro defining the english direction.
+		//however, it is somewhere in linux/blkdev.h
+		printk("[LOOK] dsp %d %d", rq_data_dir(rq), (int)rq->beg_pos);
+		
 		list_del_init(&rq->queue);
 		elv_dispatch_add_tail(q, rq->rq);
 		ld->head_pos = rq->beg_pos + blk_rq_sectors(rq->rq) - 1;
@@ -143,7 +146,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			pos->queue.prev->next = &(ld->queue);
 			pos->queue.prev = &(ld->queue);
 		}
-
+		
 		return 1;
 	}
 	return 0;
@@ -168,7 +171,9 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     new->beg_pos = rq->bio->bi_sector;
     new->look_metadata = nd;
 
-    printk("[LOOK] add <direction> %d", (int)new->beg_pos);
+	//Kevin: I could not find the macro defining the english direction.
+	//however, it is somewhere in linux/blkdev.h
+    printk("[LOOK] add %d %d", rq_data_dir(new), (int)new->beg_pos);
 
     /*debug code*/
     list_add( &new->queue, &nd->queue );

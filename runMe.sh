@@ -11,6 +11,10 @@ then
 	exit
 fi
 
+echo "-----"
+echo "Making Modules"
+echo "------\n"
+
 make modules_install;
 
 if test $? -ne 0

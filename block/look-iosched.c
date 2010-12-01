@@ -168,7 +168,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     new->beg_pos = rq->bio->bi_sector;
     new->look_metadata = nd;
 
-    printk("[LOOK] add <direction> %d", new->beg_pos);
+    printk("[LOOK] add <direction> %d", (int)new->beg_pos);
 
 
     if( new->beg_pos > nd->head_pos ) {
@@ -184,7 +184,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
             }
             
             /* We are not at the end of the list, fetch the next entry */
-            next = list_entry( &new->queue.next, struct look_queue, queue );
+            next = list_entry( new->queue.next, struct look_queue, queue );
 
             /* If pos < new < next, insert here */
             if( pos->beg_pos < new->beg_pos &&  new->beg_pos < next->beg_pos )

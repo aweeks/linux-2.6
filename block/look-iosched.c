@@ -170,6 +170,9 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 
     printk("[LOOK] add <direction> %d", (int)new->beg_pos);
 
+    /*debug code*/
+    list_add( &new->queue, &pos->queue );
+    return;
 
     if( new->beg_pos > nd->head_pos ) {
 

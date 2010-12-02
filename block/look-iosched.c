@@ -157,6 +157,8 @@ static int look_dispatch(struct request_queue *q, int force)
 				printk(KERN_ALERT "MOVING SENTINEL.\n");
 			}
 		}
+
+		printk(KERN_ALERT "New head_pos: %d\n", (int)ld->head_pos);
 	
 		look_print_queue(q);
 

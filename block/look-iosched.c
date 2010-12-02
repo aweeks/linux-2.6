@@ -3,7 +3,7 @@
  * dispatched based on the current sector, the requests sector, and the
  * direction that the arm is progressing
  * 
- * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal
+ * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordahl
  */ 
 
 #include <linux/blkdev.h>
@@ -154,9 +154,12 @@ static int look_dispatch(struct request_queue *q, int force)
 			if (&ld->queue != pos->queue.prev)
 			{
 				list_move(&ld->queue, pos->queue.prev);
+				printk(KERN_ALERT "MOVING SENTINEL.\n");
 			}
 		}
-		
+	
+		look_print_queue(q);
+
 		look_put_req_fn(q, lq->rq); 
 
 		return 1;
@@ -412,6 +415,6 @@ static void __exit look_exit(void)
 module_init(look_init);
 module_exit(look_exit);
 
-MODULE_AUTHOR("Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal, Jens Axboe");
+MODULE_AUTHOR("Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordahl, Jens Axboe");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Look Scheduler IO scheduler");

@@ -314,10 +314,10 @@ static void look_exit_queue(struct elevator_queue *e)
 }
 
 /**
-* look_exit_fn -  deallocates memory allocated in look_init_fn
-* @q: the request queue
+* get_dir -  get the direction of the disk
+* @rq: a pointer to the specific request
 *
-* called when scheduler is relieved of its scheduling duties for a disk
+* Returns a 'r' for read and 'w' for write
 */
 static char get_dir(struct request * rq)
 {

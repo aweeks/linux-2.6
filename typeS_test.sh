@@ -4,15 +4,16 @@
 
 test_diskf(){
 	set +x
-	echo "Hello World" > ./test/test_disk.txt
+	echo "Hello World" > "./test/test_disk"$1".txt"
 
 	i=0
 	while [ $i -lt $1 ]
 	do
-		echo "Hello World" >> ./test/test_disk.txt
+		echo "Hello World" >> "./test/test_disk"$1".txt"
 		i=$(($i + 1));
 	done
 	set -x
+	cat "./test/test_disk"$1".txt" > /dev/null
 }
 
 set -x
@@ -34,13 +35,10 @@ echo "See test_disk.sh for more information"
 set -x
 
 test_diskf 1000 &
-cat ./test/test_disk.txt > /dev/null
 
 test_diskf 3000 &
-cat ./test/test_disk.txt > /dev/null
 
 test_diskf 10000
-cat ./test/test_disk.txt > /dev/null
 
 echo anticipatory > /sys/block/sdb/queue/scheduler
 rmmod look-iosched

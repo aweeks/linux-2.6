@@ -335,7 +335,7 @@ void look_print_queue( struct request_queue *q ) {
     struct look_queue *pos;
     struct look_data *ld = q->elevator->elevator_data;
 
-    printk(KERN_ALERT "QUEUE:\n");
+    printk(KERN_ALERT "QUEUE: head position: %d\n", ld->head_pos);
     list_for_each_entry(pos, &ld->queue, queue) {
 
         printk(KERN_ALERT "    %d\n", pos->beg_pos);

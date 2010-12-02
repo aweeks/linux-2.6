@@ -154,9 +154,12 @@ static int look_dispatch(struct request_queue *q, int force)
 			if (&ld->queue != pos->queue.prev)
 			{
 				list_move(&ld->queue, pos->queue.prev);
+				printk(KERN_ALERT "MOVING SENTINEL.\n");
 			}
 		}
-		
+	
+		look_print_queue(q);
+
 		look_put_req_fn(q, lq->rq); 
 
 		return 1;

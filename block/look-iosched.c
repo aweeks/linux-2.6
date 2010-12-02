@@ -3,7 +3,7 @@
  * dispatched based on the current sector, the requests sector, and the
  * direction that the arm is progressing
  * 
- * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal
+ * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordahl
  */ 
 
 #include <linux/blkdev.h>
@@ -68,7 +68,7 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 */
 static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
-	printk(KERN_ALERT "PUT %x\n", rq);
+	/*printk(KERN_ALERT "PUT %x\n", rq);*/
     kfree(rq->elevator_private);
 }
 
@@ -82,7 +82,7 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
 	struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
     
-    printk(KERN_ALERT "SET %x\n", rq);
+    /*printk(KERN_ALERT "SET %x\n", rq);*/
 
     INIT_LIST_HEAD(&new->queue);
 
@@ -357,8 +357,8 @@ static char get_dir(struct request * rq)
 	int dir = rq_data_dir(rq);
 	
 	if (dir == 0)
-		return 'r';
-	else return 'w';
+		return 'R';
+	else return 'W';
 } 
 
 /**
@@ -417,6 +417,6 @@ static void __exit look_exit(void)
 module_init(look_init);
 module_exit(look_exit);
 
-MODULE_AUTHOR("Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal, Jens Axboe");
+MODULE_AUTHOR("Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordahl, Jens Axboe");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Look Scheduler IO scheduler");

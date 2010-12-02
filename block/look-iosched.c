@@ -3,7 +3,7 @@
  * dispatched based on the current sector, the requests sector, and the
  * direction that the arm is progressing
  * 
- * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal
+ * @Author: Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordahl
  */ 
 
 #include <linux/blkdev.h>
@@ -382,6 +382,6 @@ static void __exit look_exit(void)
 module_init(look_init);
 module_exit(look_exit);
 
-MODULE_AUTHOR("Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal, Jens Axboe");
+MODULE_AUTHOR("Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordahl, Jens Axboe");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Look Scheduler IO scheduler");

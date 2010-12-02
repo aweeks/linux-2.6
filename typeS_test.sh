@@ -34,13 +34,13 @@ echo "See test_disk.sh for more information"
 set -x
 
 test_diskf 10
-cat test_disk.txt > /dev/null
+cat ./test/test_disk.txt > /dev/null
 
 test_diskf 100
-cat test_disk.txt > /dev/null
+cat ./test/test_disk.txt > /dev/null
 
 test_diskf 1000
-cat test_disk.txt > /dev/null
+cat ./test/test_disk.txt > /dev/null
 
 echo anticipatory > /sys/block/sdb/queue/scheduler
 rmmod look-iosched

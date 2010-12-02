@@ -189,12 +189,16 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     /*debug code*/
     if( new->beg_pos > new->look_metadata->head_pos ) {
 
+        printk(KERN_ALERT "[LOOK] add: forward.\n");
+
         /* The new request is after the current head position, search forward */
         list_for_each_entry(pos, &new->look_metadata->queue, queue)
 	    {
+            printk(KERN_ALERT "[LOOK] add: examining %x\n", (void *) pos);
             /* If we are at the end of the list, insert here */
             if( pos->queue.next == &new->look_metadata->queue )
             {
+                printk(KERN_ALERT "[LOOK] add: inserted beginning\n");
                 list_add( &new->queue, &pos->queue );
                 break;
             }
@@ -205,6 +209,8 @@ static void look_add_request(struct request_queue *q, struct request *rq)
             /* If pos < new < next, insert here */
             if( pos->beg_pos < new->beg_pos &&  new->beg_pos < next->beg_pos )
             {
+                
+                printk(KERN_ALERT "[LOOK] add: inserted middle\n");
                 list_add( &new->queue, &pos->queue );
                 break;
             }
@@ -212,6 +218,8 @@ static void look_add_request(struct request_queue *q, struct request *rq)
             /* If next < pos, then we have reached the end of this side of the queue, insert here */
             if( next->beg_pos < pos->beg_pos )
             {
+
+                printk(KERN_ALERT "[LOOK] add: inserted end\n");
                 list_add( &new->queue, &pos->queue );
                 break;
             }
@@ -219,7 +227,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     } else
     {
         // The new request is before the current head position, search backwards */
-         //early_printk("Reverse, not implemented\n");
+         printk(KERN_ALERT "[LOOK] add: reverse, stupid insert\n");
          list_add(&new->queue, &new->look_metadata->queue);
     }
 	

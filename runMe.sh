@@ -13,7 +13,7 @@ fi
 
 echo "-----"
 echo "Making Modules"
-echo "------\n"
+echo "------"
 
 make modules_install;
 
@@ -29,7 +29,5 @@ mv vmlinux vmlinux-2.6.34.7
 echo "Moving the file over"
 
 cp ./arch/i386/boot/bzImage /boot/vmlinuz-2.6.34.7
-
-modprobe look-iosched
 
 echo "Restart to finish the installation" 

@@ -134,7 +134,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			}
 		}
 
-		printk(KERN_ALERT "[LOOK] dsp %c %d\n", get_dir(lq->rq), (int)lq->beg_pos);
+		printk(KERN_ALERT "[LOOK] dsp %c %u\n", get_dir(lq->rq), lq->beg_pos);
 		
 		list_del_init(&lq->queue);
 		elv_dispatch_add_tail(q, lq->rq);
@@ -158,8 +158,6 @@ static int look_dispatch(struct request_queue *q, int force)
 			}
 		}
 
-		printk(KERN_ALERT "New head_pos: %d\n", (int)ld->head_pos);
-	
 		look_print_queue(q);
 
 		look_put_req_fn(q, lq->rq); 
@@ -183,7 +181,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     look_set_req_fn(q, rq); 
     new = rq->elevator_private;
     
-    printk(KERN_ALERT "[LOOK] add %c %d\n", get_dir(new->rq), (int)new->beg_pos);
+    printk(KERN_ALERT "[LOOK] add %c %u\n", get_dir(new->rq), new->beg_pos);
     
     if(list_empty(&new->look_metadata->queue)) {
         /* List is empty, add to end (direction is irrelevant)*/
@@ -370,10 +368,10 @@ void look_print_queue( struct request_queue *q ) {
     struct look_queue *pos;
     struct look_data *ld = q->elevator->elevator_data;
 
-    printk(KERN_ALERT "QUEUE: head position: %d\n", ld->head_pos);
+    printk(KERN_ALERT "QUEUE: head position: %u\n", ld->head_pos);
     list_for_each_entry(pos, &ld->queue, queue) {
 
-        printk(KERN_ALERT "    %d\n", pos->beg_pos);
+        printk(KERN_ALERT "    %u\n", pos->beg_pos);
 
     }
 

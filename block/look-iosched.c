@@ -16,7 +16,7 @@
 #define FWD 1 //This is "next" on the list
 #define REV 2 //This is "prev" on the list
 
-__get_dir(struct request * rq);
+static char get_dir(struct request * rq);
 
 /**
 * struct look_data - points to the queue of requests
@@ -319,7 +319,7 @@ static void look_exit_queue(struct elevator_queue *e)
 *
 * called when scheduler is relieved of its scheduling duties for a disk
 */
-static char __get_dir(struct request * rq)
+static char get_dir(struct request * rq)
 {
 	int dir = rq_data_dir(rq);
 	

@@ -134,7 +134,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			}
 		}
 
-		printk( "[LOOK] dsp %c %u\n", get_dir(lq->rq), lq->beg_pos);
+		printk( "[LOOK] DSP %c %u\n", get_dir(lq->rq), lq->beg_pos);
 		
 		list_del_init(&lq->queue);
 		elv_dispatch_add_tail(q, lq->rq);
@@ -181,90 +181,113 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     look_set_req_fn(q, rq); 
     new = rq->elevator_private;
     
-    printk( "[LOOK] add %c %u\n", get_dir(new->rq), new->beg_pos);
+    printk( "[LOOK] ADD %c %u\n", get_dir(new->rq), new->beg_pos);
     
-    if(list_empty(&new->look_metadata->queue)) {
-        /* List is empty, add to end (direction is irrelevant)*/
-        printk( "INSERT EMPTY\n");
+    /* List is empty, add */
+    if( list_empty(&new->look_metadata->queue) ) {
         list_add(&new->queue, &new->look_metadata->queue);
+        
+        printk( "INSERT EMPTY\n");
         look_print_queue(q);
         return;
     }
     
+    /* List is singular, add special case */
+    if( list_is_singular(&new->look_metadata->queue) ) {
+        next = list_entry( new->list_metadata->queue.next, struct look_queue, queue );
+        
+        if( next->beg_pos < new->beg_pos ) {
+            list_add( &new->queue, &next->queue );
+        }
+        else {
+            list_add_tail( &new->queue, &next->queue );
+        }
+        
+        printk( "INSERT SINGULAR\n");
+        look_print_queue(q);
+        return;
+
+    }
+   
+    /* List contains at least two elements */ 
     if( new->beg_pos > new->look_metadata->head_pos ) {
-        /* The new request is after the current head position, search forward */
+        
+        /* Search forward */
         printk( "FORWARD\n");
         
         list_for_each_entry(pos, &new->look_metadata->queue, queue)
 	    {
-            /* If we are at the end of the list, insert here */
-            if( pos->queue.next == &new->look_metadata->queue )
-            {
+            if( pos->queue.next != &new->look_metadata->queue ) {
+                
+                /* We have not reached the end of the list, set next and continue  */
+                next = list_entry( new->queue.next, struct look_queue, queue );
+
+                if( (pos->beg_pos < new->beg_pos) && (new->beg_pos < next->beg_pos) )
+                {
+                    /* pos < new < next, insert */
+                    printk( "INSERT MIDDLE\n");
+                    list_add( &new->queue, &pos->queue );
+                    break;
+                }
+
+
+                if( next->beg_pos < pos->beg_pos )
+                {
+                    /* next < pos: end of this side of the queue, insert */
+                    printk( "INSERT EDGE\n");
+                    list_add( &new->queue, &pos->queue );
+                    break;
+                }
+
+            } else {
+                /* End of the list, insert */
                 printk( "INSERT END\n");
                 list_add( &new->queue, &pos->queue );
                 break;
+                }
             }
-            
-            /* We are not at the end of the list, fetch the next entry */
-            next = list_entry( new->queue.next, struct look_queue, queue );
-
-            /* If pos < new < next, insert here */
-            if( (pos->beg_pos < new->beg_pos) && (new->beg_pos < next->beg_pos) )
-            {
-                printk( "INSERT MIDDLE\n");
-                list_add( &new->queue, &pos->queue );
-                break;
-            }
-
-            /* If next < pos, then we have reached the end of this side of the queue, insert here */
-            if( next->beg_pos < pos->beg_pos )
-            {
-                printk( "INSERT EDGE\n");
-                list_add( &new->queue, &pos->queue );
-                break;
-            }
-	    }
+        }
         
-    }
-    else
+    } else 
     {
-        /* The new request is beforethe current head position, search forward */
+        /* Search reverse */
         printk( "REVERSE\n");
-
+        
         list_for_each_entry_reverse(pos, &new->look_metadata->queue, queue)
 	    {
-            /* If we are at the end of the list, insert here */
-            if( pos->queue.prev == &new->look_metadata->queue )
-            {
+            if( pos->queue.prev != &new->look_metadata->queue ) {
+                
+                /* We have not reached the end of the list, set prev and continue  */
+                prev = list_entry( new->queue.prev, struct look_queue, queue );
+
+                if( (prev->beg_pos < new->beg_pos) && (new->beg_pos < pos->beg_pos) )
+                {
+                    /* prev < new < pos, insert */
+                    printk( "INSERT MIDDLE\n");
+                    list_add_tail( &new->queue, &pos->queue );
+                    break;
+                }
+
+
+                if( prev->beg_pos > pos->beg_pos )
+                {
+                    /* prev > pos: end of this side of the queue, insert */
+                    printk( "INSERT EDGE\n");
+                    list_add_tail( &new->queue, &pos->queue );
+                    break;
+                }
+
+            } else {
+                /* End of the list, insert */
                 printk( "INSERT END\n");
                 list_add_tail( &new->queue, &pos->queue );
                 break;
             }
-            
-            /* We are not at the end of the list, fetch the previous entry */
-            prev = list_entry( new->queue.prev, struct look_queue, queue );
-
-            /* If prev < new < pos, insert here */
-            if( (new->beg_pos > prev->beg_pos) && (pos->beg_pos > new->beg_pos) )
-            {
-                printk( "INSERT MIDDLE\n");
-                list_add_tail( &new->queue, &pos->queue );
-                break;
-            }
-
-            /* If prev > pos, then we have reached the end of this side of the queue, insert here */
-            if( prev->beg_pos > pos->beg_pos )
-            {
-                printk( "INSERT EDGE\n");
-                list_add_tail( &new->queue, &pos->queue );
-                break;
-            }
-	    }
+        }
+    
     }
 
-    /* Print queue for debugging */
-    look_print_queue(q);
-	
+    look_print_queue(q);	
 }
 
 /**

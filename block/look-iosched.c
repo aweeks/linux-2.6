@@ -150,12 +150,11 @@ static int look_dispatch(struct request_queue *q, int force)
 					break;
 				}
 			}
-			ld->queue.prev->next = ld->queue.next;
-			ld->queue.next->prev = ld->queue.prev;
-			ld->queue.next = &(pos->queue);
-			ld->queue.prev = pos->queue.prev;
-			pos->queue.prev->next = &(ld->queue);
-			pos->queue.prev = &(ld->queue);
+
+			if (&ld->queue != pos->queue.prev)
+			{
+				list_move(&ld->queue, pos->queue.prev);
+			}
 		}
 		
 		look_put_req_fn(q, lq->rq); 

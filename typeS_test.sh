@@ -33,10 +33,10 @@ echo "See test_disk.sh for more information"
 
 set -x
 
-test_diskf 100
+test_diskf 1000 &
 cat ./test/test_disk.txt > /dev/null
 
-test_diskf 1000
+test_diskf 3000 &
 cat ./test/test_disk.txt > /dev/null
 
 test_diskf 10000

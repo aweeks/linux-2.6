@@ -194,7 +194,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     
     /* List is singular, add special case */
     if( list_is_singular(&new->look_metadata->queue) ) {
-        next = list_entry( new->list_metadata->queue.next, struct look_queue, queue );
+        next = list_entry( new->look_metadata->queue.next, struct look_queue, queue );
         
         if( next->beg_pos < new->beg_pos ) {
             list_add( &new->queue, &next->queue );
@@ -245,9 +245,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 list_add( &new->queue, &pos->queue );
                 break;
                 }
-            }
         }
-        
     } else 
     {
         /* Search reverse */

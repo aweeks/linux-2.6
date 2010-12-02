@@ -65,7 +65,8 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 */
 static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
-	kfree(rq->elevator_private);
+	printk(KERN_ALERT "PUT %x\n", rq);
+    kfree(rq->elevator_private);
 }
 
 /**
@@ -77,7 +78,15 @@ static void look_put_req_fn(struct request_queue *q, struct request *rq)
 static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
 	struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
+    
+    printk(KERN_ALERT "SET %x\n", rq);
+
     INIT_LIST_HEAD(&new->queue);
+
+    new->rq = rq;
+    new->beg_pos = rq->bio->bi_sector;
+    new->look_metadata = q->elevator->elevator_data;
+
 	rq->elevator_private = new;
 }
 
@@ -123,7 +132,7 @@ static int look_dispatch(struct request_queue *q, int force)
 		}
 		//Kevin: I could not find the macro defining the english direction.
 		//however, it is somewhere in linux/blkdev.h
-		printk(KERN_ALERT "[LOOK] dsp %d %d", rq_data_dir(rq->rq), (int)rq->beg_pos);
+		printk(KERN_ALERT "[LOOK] dsp %d %d\n", rq_data_dir(rq->rq), (int)rq->beg_pos);
 		
 		list_del_init(&rq->queue);
 		elv_dispatch_add_tail(q, rq->rq);
@@ -160,35 +169,28 @@ static int look_dispatch(struct request_queue *q, int force)
 */
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
-	struct look_data *nd = q->elevator->elevator_data;
+
     struct look_queue *pos, *next;
 
     /*Allocate a new look_node for the request, and initialize it */
-    struct look_queue *new;
-    //new = rq->elevator_private;
+    struct look_queue *new = rq->elevator_private;
     
-	new = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
-    INIT_LIST_HEAD(&new->queue);
-    
-    new->rq = rq;
-    new->beg_pos = rq->bio->bi_sector;
-    new->look_metadata = nd;
-
 	//Kevin: I could not find the macro defining the english direction.
 	//however, it is somewhere in linux/blkdev.h
-    printk(KERN_ALERT "[LOOK] add %d %d", rq_data_dir(new->rq), (int)new->beg_pos);
+    printk(KERN_ALERT "[LOOK] add %d %d\n", rq_data_dir(new->rq), (int)new->beg_pos);
 
     /*debug code*/
-    list_add( &new->queue, &nd->queue );
+    list_add( &new->queue, &new->look_metadata->queue );
     return;
 
-    if( new->beg_pos > nd->head_pos ) {
+
+    if( new->beg_pos > new->look_metadata->head_pos ) {
 
         /* The new request is after the current head position, search forward */
-        list_for_each_entry(pos, &nd->queue, queue)
+        list_for_each_entry(pos, &new->look_metadata->queue, queue)
 	    {
             /* If we are at the end of the list, insert here */
-            if( pos->queue.next == &nd->queue )
+            if( pos->queue.next == &new->look_metadata->queue )
             {
                 list_add( &new->queue, &pos->queue );
                 break;
@@ -215,7 +217,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     {
         // The new request is before the current head position, search backwards */
          //early_printk("Reverse, not implemented\n");
-         list_add(&new->queue, &nd->queue);
+         list_add(&new->queue, &new->look_metadata->queue);
     }
 	
 }

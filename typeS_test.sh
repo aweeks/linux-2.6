@@ -21,7 +21,7 @@ modprobe look-iosched
 
 cat /sys/block/sdb/queue/scheduler
 
-echo test > /sys/block/sdb/queue/scheduler
+echo look > /sys/block/sdb/queue/scheduler
 
 cat /sys/block/sdb/queue/scheduler
 

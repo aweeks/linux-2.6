@@ -68,7 +68,7 @@ static void look_merged_requests(struct request_queue *q, struct request *rq,
 */
 static void look_put_req_fn(struct request_queue *q, struct request *rq)
 {
-	printk(KERN_ALERT "PUT %x\n", rq);
+	/*printk(KERN_ALERT "PUT %x\n", rq);*/
     kfree(rq->elevator_private);
 }
 
@@ -82,7 +82,7 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 {
 	struct look_queue *new = kmalloc(sizeof(struct look_queue), GFP_KERNEL);
     
-    printk(KERN_ALERT "SET %x\n", rq);
+    /*printk(KERN_ALERT "SET %x\n", rq);*/
 
     INIT_LIST_HEAD(&new->queue);
 
@@ -352,8 +352,8 @@ static char get_dir(struct request * rq)
 	int dir = rq_data_dir(rq);
 	
 	if (dir == 0)
-		return 'r';
-	else return 'w';
+		return 'R';
+	else return 'W';
 } 
 
 /**

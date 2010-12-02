@@ -133,7 +133,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			}
 		}
 
-		printk(KERN_ALERT "[LOOK] dsp %d %d\n", rq_data_dir(lq->rq), (int)lq->beg_pos);
+		printk(KERN_ALERT "[LOOK] dsp %c %d\n", get_dir(lq->rq), (int)lq->beg_pos);
 		
 		list_del_init(&lq->queue);
 		elv_dispatch_add_tail(q, lq->rq);

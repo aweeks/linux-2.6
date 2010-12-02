@@ -189,6 +189,15 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     if( new->beg_pos > new->look_metadata->head_pos ) {
 
         printk(KERN_ALERT "[LOOK] add: forward.\n");
+        
+        if(list_empty(&new->look_metadata->queue)) {
+            /* List is empty, add to end */
+            
+            printk(KERN_ALERT "[LOOK] add: inserted into empty list\n");
+            
+            list_add(&new->queue, &new->look_metadata->queue);
+            return;
+        }
 
         /* The new request is after the current head position, search forward */
         list_for_each_entry(pos, &new->look_metadata->queue, queue)
@@ -199,7 +208,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
             {
                 printk(KERN_ALERT "[LOOK] add: inserted end of list\n");
                 list_add( &new->queue, &pos->queue );
-                break;
+                return;
             }
             
             /* We are not at the end of the list, fetch the next entry */
@@ -211,7 +220,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 
                 printk(KERN_ALERT "[LOOK] add: inserted middle\n");
                 list_add( &new->queue, &pos->queue );
-                break;
+                return;
             }
 
             /* If next < pos, then we have reached the end of this side of the queue, insert here */
@@ -220,15 +229,11 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 
                 printk(KERN_ALERT "[LOOK] add: inserted edge\n");
                 list_add( &new->queue, &pos->queue );
-                break;
+                return;
             }
 	    }
         
-        /* List is empty, add to end */
-        list_add(&new->queue, &new->look_metadata->queue);
-        return;
-    } else
-    {
+    } else {
         // The new request is before the current head position, search backwards 
          printk(KERN_ALERT "[LOOK] add: reverse, stupid insert\n");
          list_add(&new->queue, &new->look_metadata->queue);

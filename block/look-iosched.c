@@ -120,7 +120,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			if (lq->beg_pos < ld->head_pos)
 			{
 				ld->dir = REV;
-				rq = list_entry(ld->queue.prev, struct look_queue, queue);			
+				lq = list_entry(ld->queue.prev, struct look_queue, queue);			
 			}
 		}
 		else

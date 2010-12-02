@@ -156,7 +156,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			pos->queue.prev = &(ld->queue);
 		}
 		
-		look_put_req_fn(q, rq->request); 
+		look_put_req_fn(q, rq->rq); 
 
 		return 1;
 	}

@@ -33,13 +33,13 @@ echo "See test_disk.sh for more information"
 
 set -x
 
-test_diskf 10
-cat ./test/test_disk.txt > /dev/null
-
 test_diskf 100
 cat ./test/test_disk.txt > /dev/null
 
 test_diskf 1000
+cat ./test/test_disk.txt > /dev/null
+
+test_diskf 10000
 cat ./test/test_disk.txt > /dev/null
 
 echo anticipatory > /sys/block/sdb/queue/scheduler

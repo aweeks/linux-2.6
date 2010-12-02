@@ -172,7 +172,7 @@ static int look_dispatch(struct request_queue *q, int force)
 */
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
-    struct look_queue *pos, *next, *new;
+    struct look_queue *pos, *next, *prev, *new;
     
     /* Set up look data structure */
     look_set_req_fn(q, rq); 

@@ -111,11 +111,11 @@ static int look_dispatch(struct request_queue *q, int force)
 	struct look_data *ld = q->elevator->elevator_data;
 
 	if (!list_empty(&ld->queue)) {
-		struct look_queue *rq;
+		struct look_queue *lq;
 		if (ld->dir == FWD)
 		{
-			rq = list_entry(ld->queue.next, struct look_queue, queue);
-			if (rq->beg_pos < ld->head_pos)
+			lq = list_entry(ld->queue.next, struct look_queue, queue);
+			if (lq->beg_pos < ld->head_pos)
 			{
 				ld->dir = REV;
 				rq = list_entry(ld->queue.prev, struct look_queue, queue);			
@@ -123,19 +123,19 @@ static int look_dispatch(struct request_queue *q, int force)
 		}
 		else
 		{
-			rq = list_entry(ld->queue.prev, struct look_queue, queue);			
-			if (rq->beg_pos > ld->head_pos)
+			lq = list_entry(ld->queue.prev, struct look_queue, queue);			
+			if (lq->beg_pos > ld->head_pos)
 			{
 				ld->dir = FWD;
-				rq = list_entry(ld->queue.prev, struct look_queue, queue);			
+				lq = list_entry(ld->queue.prev, struct look_queue, queue);			
 			}
 		}
 
-		printk(KERN_ALERT "[LOOK] dsp %c %d\n", get_dir(rq->rq), (int)rq->beg_pos);
+		printk(KERN_ALERT "[LOOK] dsp %d %d\n", rq_data_dir(lq->rq), (int)lq->beg_pos);
 		
-		list_del_init(&rq->queue);
-		elv_dispatch_add_tail(q, rq->rq);
-		ld->head_pos = rq->beg_pos + blk_rq_sectors(rq->rq) - 1;
+		list_del_init(&lq->queue);
+		elv_dispatch_add_tail(q, lq->rq);
+		ld->head_pos = lq->beg_pos + blk_rq_sectors(lq->rq) - 1;
 		
 		if (ld->dir == FWD)
 		{
@@ -155,7 +155,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			pos->queue.prev = &(ld->queue);
 		}
 		
-		look_put_req_fn(q, rq->rq); 
+		look_put_req_fn(q, lq->rq); 
 
 		return 1;
 	}

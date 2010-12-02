@@ -132,7 +132,7 @@ static int look_dispatch(struct request_queue *q, int force)
 		}
 		//Kevin: I could not find the macro defining the english direction.
 		//however, it is somewhere in linux/blkdev.h
-		printk(KERN_ALERT "[LOOK] dsp %d %d\n", rq_data_dir(rq->rq), (int)rq->beg_pos);
+		printk(KERN_ALERT "[LOOK] dsp %c %d\n", get_dir(rq->rq), (int)rq->beg_pos);
 		
 		list_del_init(&rq->queue);
 		elv_dispatch_add_tail(q, rq->rq);
@@ -184,7 +184,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     
 	//Kevin: I could not find the macro defining the english direction.
 	//however, it is somewhere in linux/blkdev.h
-    printk(KERN_ALERT "[LOOK] add %d %d\n", rq_data_dir(new->rq), (int)new->beg_pos);
+    printk(KERN_ALERT "[LOOK] add %c %d\n", get_dir(new->rq), (int)new->beg_pos);
 
     /*debug code*/
     if( new->beg_pos > new->look_metadata->head_pos ) {
@@ -294,9 +294,6 @@ static void *look_init_queue(struct request_queue *q)
 *
 * called when scheduler is relieved of its scheduling duties for a disk
 */
-
-//TODO: Had to change the function name to work with the definition.
-//Still need to change the inner workings of the function
 static void look_exit_queue(struct elevator_queue *e)
 {
 	struct look_data *nd = e->elevator_data;
@@ -304,6 +301,21 @@ static void look_exit_queue(struct elevator_queue *e)
 	BUG_ON(!list_empty(&nd->queue));
 	kfree(nd);
 }
+
+/**
+* look_exit_fn -  deallocates memory allocated in look_init_fn
+* @q: the request queue
+*
+* called when scheduler is relieved of its scheduling duties for a disk
+*/
+static char get_dir(struct request)
+{
+	int dir = rq_data_dir(rq);
+	
+	if (dir == 0)
+		return 'r';
+	else return 'w';
+} 
 
 /**
 * struct look_data - the elevator qu

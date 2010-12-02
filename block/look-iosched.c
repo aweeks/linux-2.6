@@ -133,7 +133,7 @@ static int look_dispatch(struct request_queue *q, int force)
 			}
 		}
 
-		printk(KERN_ALERT "[LOOK] dsp %d %d\n", rq_data_dir(lq->rq), (int)lq->beg_pos);
+		printk(KERN_ALERT "[LOOK] dsp %c %d\n", get_dir(lq->rq), (int)lq->beg_pos);
 		
 		list_del_init(&lq->queue);
 		elv_dispatch_add_tail(q, lq->rq);
@@ -319,10 +319,10 @@ static void look_exit_queue(struct elevator_queue *e)
 }
 
 /**
-* look_exit_fn -  deallocates memory allocated in look_init_fn
-* @q: the request queue
+* get_dir -  get the direction of the disk
+* @rq: a pointer to the specific request
 *
-* called when scheduler is relieved of its scheduling duties for a disk
+* Returns a 'r' for read and 'w' for write
 */
 static char get_dir(struct request * rq)
 {

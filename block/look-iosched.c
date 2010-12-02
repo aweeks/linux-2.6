@@ -16,6 +16,8 @@
 #define FWD 1 //This is "next" on the list
 #define REV 2 //This is "prev" on the list
 
+get_dir(struct request);
+
 /**
 * struct look_data - points to the queue of requests
 * @queue: points to the queue of requests

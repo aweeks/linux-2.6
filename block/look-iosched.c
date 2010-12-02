@@ -187,10 +187,6 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     printk(KERN_ALERT "[LOOK] add %d %d\n", rq_data_dir(new->rq), (int)new->beg_pos);
 
     /*debug code*/
-    list_add( &new->queue, &new->look_metadata->queue );
-    return;
-
-
     if( new->beg_pos > new->look_metadata->head_pos ) {
 
         /* The new request is after the current head position, search forward */

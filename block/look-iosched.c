@@ -17,6 +17,7 @@
 #define REV 2 //This is "prev" on the list
 
 static char get_dir(struct request * rq);
+void look_print_queue( struct request_queue * q );
 
 /**
 * struct look_data - points to the queue of requests
@@ -150,7 +151,10 @@ static int look_dispatch(struct request_queue *q, int force)
 				}
 			}
 
-			list_move(&ld->queue, pos->queue.prev);
+			if (&ld->queue != pos->queue.prev)
+			{
+				list_move(&ld->queue, pos->queue.prev);
+			}
 		}
 		
 		look_put_req_fn(q, lq->rq); 
@@ -168,43 +172,36 @@ static int look_dispatch(struct request_queue *q, int force)
 */
 static void look_add_request(struct request_queue *q, struct request *rq)
 {
-
-    struct look_queue *pos, *next;
-
-    /*Allocate a new look_node for the request, and initialize it */
-    struct look_queue *new;
+    struct look_queue *pos, *next, *new;
     
     /* Set up look data structure */
     look_set_req_fn(q, rq); 
-    
     new = rq->elevator_private;
     
     printk(KERN_ALERT "[LOOK] add %c %d\n", get_dir(new->rq), (int)new->beg_pos);
-
-    /*debug code*/
+    
+    if(list_empty(&new->look_metadata->queue)) {
+        /* List is empty, add to end (direction is irrelevant)*/
+        printk(KERN_ALERT "[LOOK] add: inserted into empty list\n");
+        list_add(&new->queue, &new->look_metadata->queue);
+        look_print_queue(q);
+        return;
+    }
+    
     if( new->beg_pos > new->look_metadata->head_pos ) {
-
         printk(KERN_ALERT "[LOOK] add: forward.\n");
-        
-        if(list_empty(&new->look_metadata->queue)) {
-            /* List is empty, add to end */
-            
-            printk(KERN_ALERT "[LOOK] add: inserted into empty list\n");
-            
-            list_add(&new->queue, &new->look_metadata->queue);
-            return;
-        }
 
         /* The new request is after the current head position, search forward */
         list_for_each_entry(pos, &new->look_metadata->queue, queue)
 	    {
             printk(KERN_ALERT "[LOOK] add: examining %x\n", (void *) pos);
+            
             /* If we are at the end of the list, insert here */
             if( pos->queue.next == &new->look_metadata->queue )
             {
                 printk(KERN_ALERT "[LOOK] add: inserted end of list\n");
                 list_add( &new->queue, &pos->queue );
-                return;
+                break;
             }
             
             /* We are not at the end of the list, fetch the next entry */
@@ -213,19 +210,17 @@ static void look_add_request(struct request_queue *q, struct request *rq)
             /* If pos < new < next, insert here */
             if( pos->beg_pos < new->beg_pos &&  new->beg_pos < next->beg_pos )
             {
-                
                 printk(KERN_ALERT "[LOOK] add: inserted middle\n");
                 list_add( &new->queue, &pos->queue );
-                return;
+                break;
             }
 
             /* If next < pos, then we have reached the end of this side of the queue, insert here */
             if( next->beg_pos < pos->beg_pos )
             {
-
                 printk(KERN_ALERT "[LOOK] add: inserted edge\n");
                 list_add( &new->queue, &pos->queue );
-                return;
+                break;
             }
 	    }
         
@@ -234,6 +229,8 @@ static void look_add_request(struct request_queue *q, struct request *rq)
          printk(KERN_ALERT "[LOOK] add: reverse, stupid insert\n");
          list_add(&new->queue, &new->look_metadata->queue);
     }
+
+    look_print_queue(q);
 	
 }
 
@@ -328,6 +325,24 @@ static char get_dir(struct request * rq)
 		return 'r';
 	else return 'w';
 } 
+
+/**
+* look_print_queue -  print te specified look queue
+* @q: request_queue in question
+*
+*/
+void look_print_queue( struct request_queue *q ) {
+    struct look_queue *pos;
+    struct look_data *ld = q->elevator->elevator_data;
+
+    printk(KERN_ALERT "QUEUE: head position: %d\n", ld->head_pos);
+    list_for_each_entry(pos, &ld->queue, queue) {
+
+        printk(KERN_ALERT "    %d\n", pos->beg_pos);
+
+    }
+
+}
 
 /**
 * struct look_data - the elevator qu

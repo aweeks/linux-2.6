@@ -150,7 +150,10 @@ static int look_dispatch(struct request_queue *q, int force)
 				}
 			}
 
-			list_move(&ld->queue, pos->queue.prev);
+			if (&ld->queue != pos->queue.prev)
+			{
+				list_move(&ld->queue, pos->queue.prev);
+			}
 		}
 		
 		look_put_req_fn(q, lq->rq); 

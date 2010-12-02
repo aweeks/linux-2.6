@@ -173,7 +173,12 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     struct look_queue *pos, *next;
 
     /*Allocate a new look_node for the request, and initialize it */
-    struct look_queue *new = rq->elevator_private;
+    struct look_queue *new;
+    
+    /* Set up look data structure */
+    look_set_req_fn(q, rq); 
+    
+    new = rq->elevator_private;
     
 	//Kevin: I could not find the macro defining the english direction.
 	//however, it is somewhere in linux/blkdev.h

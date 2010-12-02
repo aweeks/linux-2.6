@@ -130,8 +130,7 @@ static int look_dispatch(struct request_queue *q, int force)
 				rq = list_entry(ld->queue.prev, struct look_queue, queue);			
 			}
 		}
-		//Kevin: I could not find the macro defining the english direction.
-		//however, it is somewhere in linux/blkdev.h
+
 		printk(KERN_ALERT "[LOOK] dsp %c %d\n", get_dir(rq->rq), (int)rq->beg_pos);
 		
 		list_del_init(&rq->queue);
@@ -182,8 +181,6 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     
     new = rq->elevator_private;
     
-	//Kevin: I could not find the macro defining the english direction.
-	//however, it is somewhere in linux/blkdev.h
     printk(KERN_ALERT "[LOOK] add %c %d\n", get_dir(new->rq), (int)new->beg_pos);
 
     /*debug code*/
@@ -226,7 +223,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
 	    }
     } else
     {
-        // The new request is before the current head position, search backwards */
+        // The new request is before the current head position, search backwards 
          printk(KERN_ALERT "[LOOK] add: reverse, stupid insert\n");
          list_add(&new->queue, &new->look_metadata->queue);
     }
@@ -363,6 +360,6 @@ static void __exit look_exit(void)
 module_init(look_init);
 module_exit(look_exit);
 
-MODULE_AUTHOR("Jens Axboe, Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal");
+MODULE_AUTHOR("Alex Weeks, Kevin McIntosh, Tyler McClung, Josh Jordenthal, Jens Axboe");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Look Scheduler IO scheduler");

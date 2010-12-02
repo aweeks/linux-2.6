@@ -197,7 +197,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
             /* If we are at the end of the list, insert here */
             if( pos->queue.next == &new->look_metadata->queue )
             {
-                printk(KERN_ALERT "[LOOK] add: inserted beginning\n");
+                printk(KERN_ALERT "[LOOK] add: inserted end of list\n");
                 list_add( &new->queue, &pos->queue );
                 break;
             }
@@ -218,7 +218,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
             if( next->beg_pos < pos->beg_pos )
             {
 
-                printk(KERN_ALERT "[LOOK] add: inserted end\n");
+                printk(KERN_ALERT "[LOOK] add: inserted edge\n");
                 list_add( &new->queue, &pos->queue );
                 break;
             }

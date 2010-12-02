@@ -221,6 +221,10 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 break;
             }
 	    }
+        
+        /* List is empty, add to end */
+        list_add(&new->queue, &new->look_metadata->queue);
+        return;
     } else
     {
         // The new request is before the current head position, search backwards 

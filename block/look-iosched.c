@@ -333,9 +333,10 @@ static char get_dir(struct request * rq)
 */
 void look_print_queue( struct request_queue *q ) {
     struct look_queue *pos;
+    struct look_data *ld = q->elevator->elevator_data;
 
     printk(KERN_ALERT "QUEUE:\n");
-    list_for_each_entry(pos, &q->elevator->elevator_data->queue, queue) {
+    list_for_each_entry(pos, &ld->queue, queue) {
 
         printk("    %d\n", pos->beg_pos);
 

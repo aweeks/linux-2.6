@@ -319,7 +319,7 @@ static void look_exit_queue(struct elevator_queue *e)
 *
 * called when scheduler is relieved of its scheduling duties for a disk
 */
-static char get_dir(struct request)
+static char get_dir(struct request * rq)
 {
 	int dir = rq_data_dir(rq);
 	

@@ -196,7 +196,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     if( list_is_singular(&new->look_metadata->queue) ) {
         pos = list_entry( new->look_metadata->queue.next, struct look_queue, queue );
         
-        if( new->look_metadata->head_pos < pos->beg_pos ) {
+        if( new->look_metadata->head_pos > pos->beg_pos ) {
             list_add( &new->queue, &new->look_metadata->queue );
         }
         else {

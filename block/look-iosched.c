@@ -225,7 +225,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 /* Insert at beginning of list */
                 if( pos->beg_pos > new->beg_pos ) {
                     printk( "INSERT BEGINNING\n");
-                    list_add( &new->look_metadata->queue );
+                    list_add( &new->queue, &new->look_metadata->queue );
                     break;
                 }
                 
@@ -268,7 +268,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 /* Insert at beginning of list */
                 if( pos->beg_pos < new->beg_pos ) {
                     printk( "INSERT BEGINNING\n");
-                    list_add_tail( &new->look_metadata->queue );
+                    list_add_tail( &new->queue, &new->look_metadata->queue );
                     break;
                 }
 

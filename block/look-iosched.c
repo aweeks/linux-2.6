@@ -221,7 +221,14 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 
                 /* We have not reached the end of the list, set next and continue  */
                 next = list_entry( new->queue.next, struct look_queue, queue );
-
+                
+                /* Insert at beginning of list */
+                if( pos->beg_pos > new->beg_pos ) {
+                    printk( "INSERT BEGINNING\n");
+                    list_add( &new->look_metadata->queue );
+                    break;
+                }
+                
                 if( (pos->beg_pos < new->beg_pos) && (new->beg_pos < next->beg_pos) )
                 {
                     /* pos < new < next, insert */
@@ -257,6 +264,13 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 
                 /* We have not reached the end of the list, set prev and continue  */
                 prev = list_entry( new->queue.prev, struct look_queue, queue );
+
+                /* Insert at beginning of list */
+                if( pos->beg_pos < new->beg_pos ) {
+                    printk( "INSERT BEGINNING\n");
+                    list_add_tail( &new->look_metadata->queue );
+                    break;
+                }
 
                 if( (prev->beg_pos < new->beg_pos) && (new->beg_pos < pos->beg_pos) )
                 {

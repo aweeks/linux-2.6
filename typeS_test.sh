@@ -13,7 +13,7 @@ test_diskf(){
 		i=$(($i + 1));
 	done
 	set -x
-	cat "./test/test_disk"$1".txt"
+	cat "./test/test_disk"$1".txt" > /dev/null
 }
 
 set -x
@@ -39,6 +39,8 @@ test_diskf 10000 &
 test_diskf 30000 &
 
 test_diskf 100000
+
+cat rand.txt
 
 echo noop > /sys/block/sdb/queue/scheduler
 rmmod look-iosched

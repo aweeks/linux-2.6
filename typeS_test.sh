@@ -40,7 +40,7 @@ test_diskf 30000 &
 
 test_diskf 100000
 
-cat rand.txt
+cat rand.txt > /dev/null
 
 echo noop > /sys/block/sdb/queue/scheduler
 rmmod look-iosched

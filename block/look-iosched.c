@@ -13,8 +13,8 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 
-#define FWD 1 //This is "next" on the list
-#define REV 2 //This is "prev" on the list
+#define FWD 1
+#define REV 2
 
 static char get_dir(struct request * rq);
 void look_print_queue( struct request_queue * q );

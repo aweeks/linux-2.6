@@ -241,7 +241,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 }
 
 
-                if( next->beg_pos < new->look_metadata->head_pos )
+                if( next->beg_pos < pos->look_metadata->head_pos )
                 {
                     /* next < pos: end of this side of the queue, insert */
                     printk( "INSERT EDGE\n");
@@ -284,7 +284,7 @@ static void look_add_request(struct request_queue *q, struct request *rq)
                 }
 
 
-                if( prev->beg_pos > new->look_metadata->head_pos )
+                if( prev->beg_pos > pos->look_metadata->head_pos )
                 {
                     /* prev > pos: end of this side of the queue, insert */
                     printk( "INSERT EDGE\n");

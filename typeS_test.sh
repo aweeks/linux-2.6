@@ -40,7 +40,7 @@ test_diskf 3000 &
 
 test_diskf 10000
 
-echo anticipatory > /sys/block/sdb/queue/scheduler
+echo noop > /sys/block/sdb/queue/scheduler
 rmmod look-iosched
 
 exit

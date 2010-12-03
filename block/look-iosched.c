@@ -194,13 +194,13 @@ static void look_add_request(struct request_queue *q, struct request *rq)
     
     /* List is singular, add special case */
     if( list_is_singular(&new->look_metadata->queue) ) {
-        next = list_entry( new->look_metadata->queue.next, struct look_queue, queue );
+        pos = list_entry( new->look_metadata->queue.next, struct look_queue, queue );
         
-        if( next->beg_pos < new->beg_pos ) {
-            list_add( &new->queue, &next->queue );
+        if( new->look_metadata->head_pos > pos->beg_pos ) {
+            list_add( &new->queue, &new->look_metadata->queue );
         }
         else {
-            list_add_tail( &new->queue, &next->queue );
+            list_add_tail( &new->queue, &new->look_metadata->queue );
         }
         
         printk( "INSERT SINGULAR\n");

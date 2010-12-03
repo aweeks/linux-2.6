@@ -13,7 +13,7 @@ test_diskf(){
 		i=$(($i + 1));
 	done
 	set -x
-	cat "./test/test_disk"$1".txt" > /dev/null
+	cat "./test/test_disk"$1".txt"
 }
 
 set -x
@@ -34,13 +34,13 @@ echo "See test_disk.sh for more information"
 
 set -x
 
-test_diskf 1000 &
+test_diskf 10000 &
 
-test_diskf 3000 &
+test_diskf 30000 &
 
-test_diskf 10000
+test_diskf 100000
 
-echo anticipatory > /sys/block/sdb/queue/scheduler
+echo noop > /sys/block/sdb/queue/scheduler
 rmmod look-iosched
 
 exit

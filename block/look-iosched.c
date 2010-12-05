@@ -93,15 +93,6 @@ static void look_set_req_fn(struct request_queue *q, struct request *rq)
 	rq->elevator_private = new;
 }
 
-/*
- * TODO:
- * I/O schedulers are free to postpone requests by
-	not filling the dispatch queue unless @force
-	is non-zero.  Once dispatched, I/O schedulers
-	are not allowed to manipulate the requests -
-	they belong to generic dispatch queue.
- */ 
-
 /**
 * look_dispatch - sends the next request to the dispatch queue
 * @q: scheduler queue
